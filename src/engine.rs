@@ -8,7 +8,7 @@ use keydraw::{
 };
 use wgpu::util::DeviceExt;
 
-use crate::{Drawer, Game, Sprite, Text};
+use crate::{Color, Drawer, Game, Sprite, Text};
 
 pub struct EngineState<'a> {
     state: &'a mut State,
@@ -113,6 +113,15 @@ pub struct Engine {
 }
 
 impl Engine {
+    pub fn set_clear_color(&mut self, state: &mut EngineState, color: Color) {
+        state.state.clear_color = wgpu::Color {
+            r: color.r as f64,
+            g: color.g as f64,
+            b: color.b as f64,
+            a: color.a as f64,
+        };
+    }
+
     pub fn load_sprite(&mut self, state: &mut EngineState, bytes: &'static [u8]) -> Sprite {
         Sprite::new(
             "Unnamed Sprite",

@@ -16,6 +16,9 @@ impl Game for SpriteDemo {
         // limitation with the lower-level KeyDraw library and will hopefully
         // be fixed in the future.
         self.tux = Some(engine.load_sprite(state, include_bytes!("tux.png")));
+        // We can change the background color to make tux stand out a little
+        // more.
+        engine.set_clear_color(state, Color::rgb(0.8, 0.7, 0.6));
     }
 
     fn render<'d, 's: 'd>(&'s mut self, _engine: &mut Engine, drawer: &mut Drawer<'d>) {

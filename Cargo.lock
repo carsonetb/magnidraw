@@ -1229,7 +1229,7 @@ dependencies = [
 [[package]]
 name = "keydraw"
 version = "0.1.0"
-source = "git+https://github.com/carsonetb/keydraw?branch=trunk#b1d379b0379b4d19e464b50b44132ffecbe4ec1b"
+source = "git+https://github.com/carsonetb/keydraw?branch=trunk#762c570e793668cfe2dae15ec2910e9090590368"
 dependencies = [
  "anyhow",
  "bytemuck",
