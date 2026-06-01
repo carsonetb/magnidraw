@@ -10,6 +10,7 @@ pub struct Text {
     pub font_size: f32,
     pub line_height: f32,
     pub line_length: Option<f32>,
+    pub family: Option<&'static str>,
 }
 
 impl Text {
@@ -19,37 +20,38 @@ impl Text {
         font_size: f32,
         line_height: f32,
         line_length: Option<f32>,
+        family: Option<&'static str>,
     ) -> Self {
-        let mut buffer =
+        let buffer =
             glyphon::Buffer::new(font_system, glyphon::Metrics::new(font_size, line_height));
 
-        buffer.set_size(font_system, line_length, None);
-        buffer.set_text(
-            font_system,
-            text,
-            &glyphon::Attrs::new().family(glyphon::Family::SansSerif),
-            glyphon::Shaping::Advanced,
-            None,
-        );
-        buffer.shape_until_scroll(font_system, false);
-
-        Self {
+        let mut out = Self {
             buffer,
             text: text.to_string(),
             font_size,
             line_height,
             line_length,
-        }
+            family,
+        };
+
+        out.reload(font_system);
+        out
     }
 
-    pub(crate) fn set_text(&mut self, font_system: &mut glyphon::FontSystem, text: &str) {
+    pub(crate) fn reload(&mut self, font_system: &mut glyphon::FontSystem) {
+        self.buffer.set_size(font_system, self.line_length, None);
         self.buffer.set_text(
             font_system,
-            text,
-            &glyphon::Attrs::new().family(glyphon::Family::SansSerif),
+            &self.text,
+            &glyphon::Attrs::new().family(if let Some(family) = self.family {
+                glyphon::Family::Name(&family)
+            } else {
+                glyphon::Family::SansSerif
+            }),
             glyphon::Shaping::Advanced,
             None,
         );
+        self.buffer.shape_until_scroll(font_system, false);
     }
 }
 

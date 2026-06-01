@@ -109,7 +109,6 @@ pub struct Engine {
     text_atlas: Option<Rc<RefCell<glyphon::TextAtlas>>>,
     text_renderer: Option<Rc<RefCell<glyphon::TextRenderer>>>,
     viewport: Option<glyphon::Viewport>,
-    hello_text: Option<Text>,
 }
 
 impl Engine {
@@ -131,21 +130,29 @@ impl Engine {
         )
     }
 
-    pub fn load_text(&self, text: &str, font_size: f32) -> Text {
+    pub fn load_font(&self, bytes: &'static [u8]) {
+        self.font_system
+            .as_ref()
+            .unwrap()
+            .borrow_mut()
+            .deref_mut()
+            .db_mut()
+            .load_font_data(bytes.to_vec());
+    }
+
+    pub fn load_text(&self, text: &str, font_size: f32, family: Option<&'static str>) -> Text {
         Text::new(
             self.font_system.as_ref().unwrap().borrow_mut().deref_mut(),
             text,
             font_size,
             font_size + 10.0,
             None,
+            family,
         )
     }
 
-    pub fn change_text(&self, text: &mut Text, new: &str) {
-        text.set_text(
-            self.font_system.as_ref().unwrap().borrow_mut().deref_mut(),
-            new,
-        );
+    pub fn reload_text(&self, text: &mut Text) {
+        text.reload(self.font_system.as_ref().unwrap().borrow_mut().deref_mut());
     }
 
     fn new() -> Self {
@@ -161,7 +168,6 @@ impl Engine {
             text_atlas: None,
             text_renderer: None,
             viewport: None,
-            hello_text: None,
         }
     }
 
@@ -354,14 +360,6 @@ impl Engine {
         self.text_atlas = Some(Rc::new(RefCell::new(atlas)));
         self.text_renderer = Some(Rc::new(RefCell::new(text_renderer)));
         self.viewport = Some(viewport);
-
-        self.hello_text = Some(Text::new(
-            self.font_system.as_ref().unwrap().borrow_mut().deref_mut(),
-            "Hello, World!",
-            50.0,
-            40.0,
-            None,
-        ));
     }
 
     fn event(&mut self, event: &Event, state: &mut State) {
