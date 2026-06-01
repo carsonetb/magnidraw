@@ -10,18 +10,18 @@ impl Game for SpriteDemo {
         // frame, it just *feels* inefficient. The load_sprite function
         // requires access to engine state because it creates and modifies
         // uniform buffers.
-        //
-        // Unfortunately, due to this limitation, it's not currently possible
-        // to load images dynamically in the render function. This is a
-        // limitation with the lower-level KeyDraw library and will hopefully
-        // be fixed in the future.
         self.tux = Some(engine.load_sprite(state, include_bytes!("tux.png")));
         // We can change the background color to make tux stand out a little
         // more.
         engine.set_clear_color(state, Color::rgb(0.8, 0.7, 0.6));
     }
 
-    fn render<'d, 's: 'd>(&'s mut self, _engine: &mut Engine, drawer: &mut Drawer<'d>) {
+    fn render<'d, 's: 'd>(
+        &'s mut self,
+        _engine: &mut Engine,
+        _state: &mut EngineState,
+        drawer: &mut Drawer<'d>,
+    ) {
         // Drawing the sprite is relatively simple.
         drawer.sprite(
             0,

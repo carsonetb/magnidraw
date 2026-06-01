@@ -1,11 +1,14 @@
-use magnidraw::{Color, Drawer, Game, Rect};
+use magnidraw::{Color, Drawer, EngineState, Game, Rect};
 
 pub struct SpriteDemo {}
 
 impl Game for SpriteDemo {
-    fn setup(&mut self, _engine: &mut magnidraw::Engine, _state: &mut magnidraw::EngineState) {}
-
-    fn render<'d, 's: 'd>(&'s mut self, _engine: &mut magnidraw::Engine, drawer: &mut Drawer<'d>) {
+    fn render<'d, 's: 'd>(
+        &'s mut self,
+        _engine: &mut magnidraw::Engine,
+        _state: &mut EngineState,
+        drawer: &mut Drawer<'d>,
+    ) {
         // Drawing a rectangle is much like it is done in other rendering
         // libraries!
         for i in 0..40 {

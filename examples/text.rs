@@ -20,7 +20,12 @@ impl Game for TextDemo {
         self.text = Some(engine.load_text("Hello, World!", 50.0, Some("Courier Prime")));
     }
 
-    fn render<'d, 's: 'd>(&'s mut self, engine: &mut Engine, drawer: &mut Drawer<'d>) {
+    fn render<'d, 's: 'd>(
+        &'s mut self,
+        engine: &mut Engine,
+        _state: &mut EngineState,
+        drawer: &mut Drawer<'d>,
+    ) {
         // Here we show an example of changing the text. We always append a
         // random number from 1..9 to the end of the string.
         self.text.as_mut().unwrap().text = format!(

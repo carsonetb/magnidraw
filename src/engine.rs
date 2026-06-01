@@ -1,14 +1,15 @@
 use std::{cell::RefCell, ops::DerefMut, rc::Rc};
 
 use keydraw::{
-    Command, Event, Program,
+    Command, Program,
     builders::{FragmentBuilder, PipelineBuilder, VertexBuilder},
     data::CameraUniform,
     state::State,
 };
 use wgpu::util::DeviceExt;
+use winit_input_helper::WinitInputHelper;
 
-use crate::{Color, Drawer, Game, Sprite, Text};
+use crate::{Color, Drawer, Game, Input, Sprite, Text};
 
 pub struct EngineState<'a> {
     state: &'a mut State,
@@ -35,54 +36,39 @@ impl Program for EngineHolder {
             .setup(&mut self.engine, &mut EngineState { state });
     }
 
-    fn event(&mut self, event: &Event, state: &mut State) {
+    fn event(&mut self, event: &winit::event::WindowEvent, state: &mut State) {
         self.engine.event(event, state);
     }
 
-    fn render(&'_ mut self) -> Vec<Command<'_>> {
+    fn device_event(&mut self, device_event: &winit::event::DeviceEvent, state: &mut State) {
+        self.engine.device_event(device_event, state);
+    }
+
+    fn new_events(&mut self, _state: &mut State) {
+        self.engine.input.step();
+    }
+
+    fn about_to_wait(&mut self, state: &mut State) {
+        self.engine.input.end_step();
+
+        let took_input = std::mem::take(&mut self.engine.input);
+        let input = Input::new(&took_input);
+        self.game
+            .update(&mut self.engine, &mut EngineState { state }, &input);
+        self.engine.input = took_input;
+    }
+
+    fn render(&'_ mut self, state: &mut State) -> Vec<Command<'_>> {
         let mut drawer = Drawer::new(
             self.engine.camera_material_index,
             self.engine.rect_pipeline_index,
             self.engine.rectext_pipeline_index,
             self.engine.sprite_pipeline_index,
         );
-        // for i in 0..40 {
-        //     drawer.rect(
-        //         0,
-        //         Rect::new(
-        //             100.0 + i as f32 * 10.0,
-        //             100.0 + i as f32 * 10.0,
-        //             500.0,
-        //             600.0,
-        //         ),
-        //         Color::rgba(1.0, 1.0, 1.0, 0.01),
-        //     );
-        // }
-        // drawer.rect_ext(
-        //     1,
-        //     Rect::new(100.0, 100.0, 500.0, 600.0),
-        //     Color::rgb(1.0, 1.0, 1.0),
-        //     20.0,
-        //     40.0,
-        //     50.0,
-        //     400.0,
-        // );
-        // for i in 0..20 {
-        //     drawer.text(
-        //         2,
-        //         &self.hello_text.as_ref().unwrap(),
-        //         Pos::new(10.0 + i as f32 * 50.0, 10.0 + i as f32 * 50.0),
-        //         Color::rgb(i as f32 / 20.0, 1.0 - i as f32 / 20.0, 1.0),
-        //     )
-        // }
-        // drawer.sprite(
-        //     -1,
-        //     self.sprite.as_ref().unwrap(),
-        //     Pos::new(10.0, 10.0),
-        //     Scale::ONE,
-        //     Color::WHITE,
-        // );
-        self.game.render(&mut self.engine, &mut drawer);
+
+        self.game
+            .render(&mut self.engine, &mut EngineState { state }, &mut drawer);
+
         drawer.collect(
             self.engine.font_system.as_ref().unwrap().clone(),
             self.engine.swash_cache.as_ref().unwrap().clone(),
@@ -94,14 +80,13 @@ impl Program for EngineHolder {
 }
 
 pub struct Engine {
-    camera_buffer: Option<wgpu::Buffer>,
-
     // Pipelines and materials
     rect_pipeline_index: u32,
     rectext_pipeline_index: u32,
     sprite_pipeline_index: u32,
     sprite_bind_group_layout: Option<wgpu::BindGroupLayout>,
     camera_material_index: u32,
+    camera_buffer: Option<wgpu::Buffer>,
 
     // Text stuff
     font_system: Option<Rc<RefCell<glyphon::FontSystem>>>,
@@ -109,6 +94,9 @@ pub struct Engine {
     text_atlas: Option<Rc<RefCell<glyphon::TextAtlas>>>,
     text_renderer: Option<Rc<RefCell<glyphon::TextRenderer>>>,
     viewport: Option<glyphon::Viewport>,
+
+    // Input
+    input: WinitInputHelper,
 }
 
 impl Engine {
@@ -168,6 +156,7 @@ impl Engine {
             text_atlas: None,
             text_renderer: None,
             viewport: None,
+            input: WinitInputHelper::new(),
         }
     }
 
@@ -360,11 +349,15 @@ impl Engine {
         self.text_atlas = Some(Rc::new(RefCell::new(atlas)));
         self.text_renderer = Some(Rc::new(RefCell::new(text_renderer)));
         self.viewport = Some(viewport);
+
+        state.enable_vsync();
     }
 
-    fn event(&mut self, event: &Event, state: &mut State) {
+    fn event(&mut self, event: &winit::event::WindowEvent, state: &mut State) {
+        self.input.process_window_event(event);
+
         match event {
-            Event::Resize(width, height) => {
+            winit::event::WindowEvent::Resized(winit::dpi::PhysicalSize { width, height }) => {
                 let camera = CameraUniform::new(*width as f32, *height as f32);
                 state.queue.write_buffer(
                     &self.camera_buffer.as_ref().unwrap(),
@@ -380,6 +373,11 @@ impl Engine {
                     },
                 );
             }
+            _ => (),
         }
+    }
+
+    fn device_event(&mut self, device_event: &winit::event::DeviceEvent, _state: &mut State) {
+        self.input.process_device_event(device_event);
     }
 }
