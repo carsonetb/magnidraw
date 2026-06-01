@@ -82,7 +82,7 @@ impl Program for EngineHolder {
         //     Scale::ONE,
         //     Color::WHITE,
         // );
-        self.game.render(&mut drawer);
+        self.game.render(&mut self.engine, &mut drawer);
         drawer.collect(
             self.engine.font_system.as_ref().unwrap().clone(),
             self.engine.swash_cache.as_ref().unwrap().clone(),

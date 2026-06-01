@@ -2,7 +2,7 @@ use std::{cell::RefCell, ops::DerefMut, rc::Rc, u32};
 
 use keydraw::state::State;
 
-use crate::{Color, Engine, Pos};
+use crate::{Color, Pos};
 
 pub struct Text {
     buffer: glyphon::Buffer,
