@@ -1,4 +1,6 @@
-use magnidraw::{Color, Drawer, EngineState, Game, Input, KeyCode, Pos, Rect};
+use magnidraw::{
+    Button, Color, Drawer, EngineState, Game, Input, KeyboardButton, Pos, Rect, keycode,
+};
 
 pub struct InputDemo {
     character: Pos,
@@ -29,16 +31,16 @@ impl Game for InputDemo {
     fn update(&mut self, _engine: &mut magnidraw::Engine, _state: &mut EngineState, input: &Input) {
         let delta = input.delta().as_secs_f32();
         println!("{}", 1.0 / delta);
-        if input.key_pressed(KeyCode::KeyA) {
+        if input.button_pressed(keycode!(KeyA)) {
             self.character.x -= 100.0 * delta;
         }
-        if input.key_pressed(KeyCode::KeyD) {
+        if input.button_pressed(keycode!(KeyD)) {
             self.character.x += 100.0 * delta;
         }
-        if input.key_pressed(KeyCode::KeyW) {
+        if input.button_pressed(keycode!(KeyW)) {
             self.character.y -= 100.0 * delta;
         }
-        if input.key_pressed(KeyCode::KeyS) {
+        if input.button_pressed(keycode!(KeyS)) {
             self.character.y += 100.0 * delta;
         }
     }

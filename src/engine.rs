@@ -1,5 +1,6 @@
-use std::{cell::RefCell, ops::DerefMut, rc::Rc};
+use std::{cell::RefCell, collections::HashSet, ops::DerefMut, rc::Rc};
 
+use gilrs::Gilrs;
 use keydraw::{
     Command, Program,
     builders::{FragmentBuilder, PipelineBuilder, VertexBuilder},
@@ -9,7 +10,10 @@ use keydraw::{
 use wgpu::util::DeviceExt;
 use winit_input_helper::WinitInputHelper;
 
-use crate::{Color, Drawer, Game, Input, Sprite, Text};
+use crate::{
+    Color, Drawer, Game, Input, Sprite, Text,
+    input::{Button, ControllerButton},
+};
 
 pub struct EngineState<'a> {
     state: &'a mut State,
@@ -52,10 +56,16 @@ impl Program for EngineHolder {
         self.engine.input.end_step();
 
         let took_input = std::mem::take(&mut self.engine.input);
-        let input = Input::new(&took_input);
+        let mut took_gilrs = std::mem::take(&mut self.engine.gilrs).unwrap();
+        let input = Input::new(
+            &took_input,
+            &mut took_gilrs,
+            std::mem::take(&mut self.engine.previous),
+        );
         self.game
             .update(&mut self.engine, &mut EngineState { state }, &input);
         self.engine.input = took_input;
+        self.engine.gilrs = Some(took_gilrs);
     }
 
     fn render(&'_ mut self, state: &mut State) -> Vec<Command<'_>> {
@@ -97,6 +107,8 @@ pub struct Engine {
 
     // Input
     input: WinitInputHelper,
+    gilrs: Option<Gilrs>,
+    previous: HashSet<ControllerButton>,
 }
 
 impl Engine {
@@ -157,6 +169,8 @@ impl Engine {
             text_renderer: None,
             viewport: None,
             input: WinitInputHelper::new(),
+            gilrs: Some(Gilrs::new().unwrap()),
+            previous: HashSet::new(),
         }
     }
 

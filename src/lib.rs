@@ -8,10 +8,12 @@ mod text;
 pub use drawers::Drawer;
 pub use engine::{Engine, EngineState};
 pub use input::Input;
+pub use input::keycode;
+pub use input::{Button, ControllerButton};
 pub use math::*;
 pub use sprite::Sprite;
 pub use text::Text;
-pub use winit::{event::MouseButton, keyboard::KeyCode};
+pub use winit::{event::MouseButton, keyboard::KeyCode as KeyboardButton};
 
 use crate::engine::EngineHolder;
 
