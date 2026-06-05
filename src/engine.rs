@@ -13,15 +13,51 @@ use keydraw::{
     state::State,
 };
 use wgpu::util::DeviceExt;
+use winit::{dpi::LogicalPosition, window::Fullscreen};
 use winit_input_helper::WinitInputHelper;
 
 use crate::{
-    AnyAxis, Color, Drawer, Game, Input, Sprite, Text,
+    AnyAxis, Color, Drawer, Game, Input, Pos, Sprite, Text,
     input::{Controller, ControllerButton},
 };
 
 pub struct EngineState<'a> {
     state: &'a mut State,
+}
+
+impl<'a> EngineState<'a> {
+    pub fn set_window_title(&mut self, title: &str) {
+        self.state.window.set_title(title);
+    }
+
+    pub fn get_window_title(&mut self) -> String {
+        self.state.window.title()
+    }
+
+    pub fn set_window_resizable(&mut self, resizable: bool) {
+        self.state.window.set_resizable(resizable);
+    }
+
+    pub fn fullscreen_window(&mut self) {
+        self.state
+            .window
+            .set_fullscreen(Some(Fullscreen::Borderless(None)));
+    }
+
+    pub fn focus_window(&mut self) {
+        self.state.window.focus_window();
+    }
+
+    pub fn window_has_focus(&mut self) -> bool {
+        self.state.window.has_focus()
+    }
+
+    pub fn set_cursor_position(&mut self, pos: Pos) {
+        self.state
+            .window
+            .set_cursor_position(LogicalPosition::new(pos.x, pos.y))
+            .unwrap();
+    }
 }
 
 pub(crate) struct EngineHolder {
