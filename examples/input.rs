@@ -1,5 +1,6 @@
 use magnidraw::{
-    Button, Color, Drawer, EngineState, Game, Input, KeyboardButton, Pos, Rect, keycode,
+    AnyAxis, AxisDirection, Button, Color, ControllerAxis, Drawer, EngineState, Game, Input, Pos,
+    Rect, keycode,
 };
 
 pub struct InputDemo {
@@ -42,6 +43,20 @@ impl Game for InputDemo {
         }
         if input.button_pressed(keycode!(KeyS)) {
             self.character.y += 100.0 * delta;
+        }
+        let controllers = input.controllers();
+        if !controllers.is_empty() {
+            let controller = controllers[0];
+            let horiz = ControllerAxis::new(controller, AnyAxis::LeftStickX, AxisDirection::Neg);
+            let vert = ControllerAxis::new(controller, AnyAxis::LeftStickY, AxisDirection::Neg);
+            self.character.x +=
+                100.0 * input.axis(Button::Axis(horiz), Button::Axis(horiz.inverse())) * delta;
+            if input.button_pressed(Button::Axis(vert)) {
+                self.character.y += 100.0 * delta;
+            }
+            if input.button_pressed(Button::Axis(vert.inverse())) {
+                self.character.y -= 100.0 * delta;
+            }
         }
     }
 }

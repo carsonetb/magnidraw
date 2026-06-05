@@ -1,4 +1,9 @@
-use std::{cell::RefCell, collections::HashSet, ops::DerefMut, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    ops::DerefMut,
+    rc::Rc,
+};
 
 use gilrs::Gilrs;
 use keydraw::{
@@ -11,8 +16,8 @@ use wgpu::util::DeviceExt;
 use winit_input_helper::WinitInputHelper;
 
 use crate::{
-    Color, Drawer, Game, Input, Sprite, Text,
-    input::{Button, ControllerButton},
+    AnyAxis, Color, Drawer, Game, Input, Sprite, Text,
+    input::{Controller, ControllerButton},
 };
 
 pub struct EngineState<'a> {
@@ -60,7 +65,10 @@ impl Program for EngineHolder {
         let input = Input::new(
             &took_input,
             &mut took_gilrs,
-            std::mem::take(&mut self.engine.previous),
+            std::mem::take(&mut self.engine.prev_buttons),
+            std::mem::take(&mut self.engine.prev_axes),
+            self.engine.axis_press_threshold,
+            self.engine.deadzone,
         );
         self.game
             .update(&mut self.engine, &mut EngineState { state }, &input);
@@ -108,7 +116,10 @@ pub struct Engine {
     // Input
     input: WinitInputHelper,
     gilrs: Option<Gilrs>,
-    previous: HashSet<ControllerButton>,
+    prev_buttons: HashSet<ControllerButton>,
+    prev_axes: HashMap<(Controller, AnyAxis), f32>,
+    axis_press_threshold: f32,
+    deadzone: f32,
 }
 
 impl Engine {
@@ -170,7 +181,10 @@ impl Engine {
             viewport: None,
             input: WinitInputHelper::new(),
             gilrs: Some(Gilrs::new().unwrap()),
-            previous: HashSet::new(),
+            prev_buttons: HashSet::new(),
+            prev_axes: HashMap::new(),
+            axis_press_threshold: 0.5,
+            deadzone: 0.2,
         }
     }
 

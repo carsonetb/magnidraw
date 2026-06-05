@@ -7,9 +7,8 @@ mod text;
 
 pub use drawers::Drawer;
 pub use engine::{Engine, EngineState};
-pub use input::Input;
-pub use input::keycode;
-pub use input::{Button, ControllerButton};
+pub use gilrs::Axis as AnyAxis;
+pub use input::{AxisDirection, Button, ControllerAxis, ControllerButton, Input, keycode};
 pub use math::*;
 pub use sprite::Sprite;
 pub use text::Text;
