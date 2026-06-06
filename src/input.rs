@@ -14,6 +14,7 @@ macro_rules! __keycode {
 
 pub use __keycode as keycode;
 
+/// Representing any specific, valid method of input.
 pub enum Button {
     Keyboard(KeyboardButton),
     Mouse(MouseButton),
@@ -21,23 +22,29 @@ pub enum Button {
     Axis(ControllerAxis),
 }
 
+/// One of the controllers which is currently connected to the device.
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Controller {
     id: gilrs::GamepadId,
 }
 
+/// A button on a specific controller, which may only be pressed or not pressed.
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct ControllerButton {
     button: gilrs::Button,
     on: Controller,
 }
 
+/// Either negative or positive axis direction.
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub enum AxisDirection {
+    /// Left, up
     Neg = -1,
+    /// Right, down
     Pos = 1,
 }
 
+/// An axis of a joystick on a specific controller, in any direction.
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct ControllerAxis {
     axis: AnyAxis,
@@ -54,6 +61,7 @@ impl ControllerAxis {
         }
     }
 
+    /// Reverse the direction of this axis.
     pub fn inverse(mut self) -> Self {
         match self.direction {
             AxisDirection::Neg => self.direction = AxisDirection::Pos,
@@ -63,8 +71,13 @@ impl ControllerAxis {
     }
 }
 
+/// The input server, from which you may check for inputs from specific
+/// [`Button`]s.
+///
+/// The server is recreated every frame, so the lifetime only lasts for a
+/// single frame.
 pub struct Input<'a> {
-    gilrs: &'a Gilrs,
+    _gilrs: &'a Gilrs,
     input: &'a WinitInputHelper,
     prev_buttons: HashSet<ControllerButton>,
     current_buttons: HashSet<ControllerButton>,
@@ -109,7 +122,7 @@ impl<'a> Input<'a> {
         gilrs::Axis::DPadY,
     ];
 
-    pub fn new(
+    pub(crate) fn new(
         input: &'a WinitInputHelper,
         gilrs: &'a mut Gilrs,
         prev_buttons: HashSet<ControllerButton>,
@@ -144,7 +157,7 @@ impl<'a> Input<'a> {
 
         Self {
             input,
-            gilrs,
+            _gilrs: gilrs,
             prev_buttons,
             current_buttons,
             prev_axes,
@@ -154,13 +167,17 @@ impl<'a> Input<'a> {
             deadzone,
         }
     }
-}
 
-impl<'a> Input<'a> {
+    /// Get a list of all the currently connected [`Controller`]s.
     pub fn controllers(&self) -> &[Controller] {
         &self.controllers
     }
 
+    /// Check if a [`Button`] is currently pressed.
+    ///
+    /// If the button is an axis, we check if the value of the axis is greater
+    /// than the axis press threshold. You can set the threshold via
+    /// [`Input::set_axis_threshold`].
     pub fn button_pressed(&self, button: Button) -> bool {
         match button {
             Button::Controller(button) => self.current_buttons.contains(&button),
@@ -170,6 +187,9 @@ impl<'a> Input<'a> {
         }
     }
 
+    /// Check if a [`Button`] is currently not pressed.
+    ///
+    /// This function is equal to the inverse of [`Input::button_pressed`].
     pub fn button_released(&self, button: Button) -> bool {
         !self.button_pressed(button)
     }
@@ -186,6 +206,7 @@ impl<'a> Input<'a> {
         prev.abs() > thresh.abs() && prev.signum() == thresh.signum()
     }
 
+    /// Check if a button wasn't pressed last frame, and now is.
     pub fn button_just_presed(&self, button: Button) -> bool {
         match button {
             Button::Controller(button) => {
@@ -197,6 +218,7 @@ impl<'a> Input<'a> {
         }
     }
 
+    /// Check if a button was pressed last frame, and now isn't.
     pub fn button_just_released(&self, button: Button) -> bool {
         match button {
             Button::Controller(button) => {
@@ -208,12 +230,19 @@ impl<'a> Input<'a> {
         }
     }
 
+    /// Get the axis of a button.
+    ///
+    /// For controller, keyboard, and mouse buttons, this can only be 0.0 or
+    /// 1.0. For joystick axes, this can be anywhere from 0.0 to 1.0.
     pub fn button_axis(&self, button: Button) -> f32 {
         let out = match button {
             Button::Controller(button) => self.prev_buttons.contains(&button) as i32 as f32,
             Button::Axis(axis) => {
-                *self.current_axes.get(&(axis.on, axis.axis)).unwrap_or(&0.0)
-                    * (axis.direction as i32 as f32)
+                let raw = self.current_axes.get(&(axis.on, axis.axis)).unwrap_or(&0.0);
+                match axis.direction {
+                    AxisDirection::Neg => raw.min(0.0).abs(),
+                    AxisDirection::Pos => raw.max(0.0),
+                }
             }
             Button::Keyboard(key) => self.input.key_held(key) as i32 as f32,
             Button::Mouse(mouse) => self.input.mouse_held(mouse) as i32 as f32,
@@ -221,9 +250,23 @@ impl<'a> Input<'a> {
         out
     }
 
+    /// Get the axis from one button to another. The output of this function
+    /// can be anywhere from -1.0 to 1.0. The argument `neg` will be negative,
+    /// and the argument `pos` will be positive.
     pub fn axis(&self, neg: Button, pos: Button) -> f32 {
         let out = -self.button_axis(neg) + self.button_axis(pos);
         if out.abs() > self.deadzone { out } else { 0.0 }
+    }
+
+    /// Sets the threshold at which a joystick axis is considered pressed.
+    pub fn set_axis_threshold(&mut self, value: f32) {
+        self.axis_press_threshold = value;
+    }
+
+    /// Sets the threshold at which, if a joystick axis is less than the
+    /// threshold, it will be set to 0.0, regardless of the actual value.
+    pub fn set_deadzone(&mut self, value: f32) {
+        self.deadzone = value;
     }
 
     /// If a key is held, it will begin to repeat when using this function.
@@ -233,6 +276,7 @@ impl<'a> Input<'a> {
         self.input.key_pressed_os(keycode)
     }
 
+    /// Get the time since the previous frame.
     pub fn delta(&self) -> std::time::Duration {
         self.input.delta_time().unwrap_or(std::time::Duration::ZERO)
     }
