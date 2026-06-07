@@ -4,6 +4,8 @@ mod input;
 mod math;
 mod sprite;
 mod text;
+#[cfg(feature = "ui")]
+pub mod ui;
 
 pub use drawers::Drawer;
 pub use engine::{Engine, EngineState};
@@ -34,11 +36,11 @@ pub trait Game {
     /// that `self` will definetely outlive `drawer`. This makes sense, because
     /// internally the Drawer object is destroyed every frame, while `self`
     /// lasts for the entire program.
-    fn render<'d, 's: 'd>(
-        &'s mut self,
+    fn render<'frame, 'app: 'frame>(
+        &'app self,
         engine: &mut Engine,
         state: &mut EngineState,
-        drawer: &mut Drawer<'d>,
+        drawer: &mut Drawer<'frame>,
     ) {
         let _ = (engine, state, drawer);
     }
@@ -49,6 +51,16 @@ pub trait Game {
     /// collected.
     fn update(&mut self, engine: &mut Engine, state: &mut EngineState, input: &Input) {
         let _ = (engine, state, input);
+    }
+
+    #[cfg(feature = "ui")]
+    fn containers(&self) -> Vec<&crate::ui::Container> {
+        Vec::new()
+    }
+
+    #[cfg(feature = "ui")]
+    fn containers_mut(&mut self) -> Vec<&mut crate::ui::Container> {
+        Vec::new()
     }
 }
 

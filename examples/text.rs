@@ -21,19 +21,11 @@ impl Game for TextDemo {
     }
 
     fn render<'d, 's: 'd>(
-        &'s mut self,
-        engine: &mut Engine,
+        &'s self,
+        _engine: &mut Engine,
         _state: &mut EngineState,
         drawer: &mut Drawer<'d>,
     ) {
-        // Here we show an example of changing the text. We always append a
-        // random number from 1..9 to the end of the string.
-        self.text.as_mut().unwrap().text = format!(
-            "Hello World!{}",
-            (1..9).collect::<Vec<_>>().choose(&mut rand::rng()).unwrap()
-        );
-        // Reloading the text updates all its public properties.
-        engine.reload_text(&mut self.text.as_mut().unwrap());
         // Drawing the text is relatively simple, we provide it to the drawer.
         // The lifetimes let us give the drawer a reference to the text,
         // because the borrow checker knows that the text (owned by self) will
@@ -44,6 +36,17 @@ impl Game for TextDemo {
             Pos::new(10.0, 10.0),
             Color::WHITE,
         );
+    }
+
+    fn update(&mut self, engine: &mut Engine, _state: &mut EngineState, _input: &magnidraw::Input) {
+        // Here we show an example of changing the text. We always append a
+        // random number from 1..9 to the end of the string.
+        self.text.as_mut().unwrap().text = format!(
+            "Hello World!{}",
+            (1..9).collect::<Vec<_>>().choose(&mut rand::rng()).unwrap()
+        );
+        // Reloading the text updates all its public properties.
+        engine.reload_text(&mut self.text.as_mut().unwrap());
     }
 }
 

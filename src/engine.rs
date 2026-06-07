@@ -106,8 +106,15 @@ impl Program for EngineHolder {
             self.engine.axis_press_threshold,
             self.engine.deadzone,
         );
+
         self.game
             .update(&mut self.engine, &mut EngineState { state }, &input);
+
+        #[cfg(feature = "ui")]
+        for container in self.game.containers_mut() {
+            container.update(&mut self.engine, &mut EngineState { state }, &input);
+        }
+
         self.engine.input = took_input;
         self.engine.gilrs = Some(took_gilrs);
     }
@@ -122,6 +129,11 @@ impl Program for EngineHolder {
 
         self.game
             .render(&mut self.engine, &mut EngineState { state }, &mut drawer);
+
+        #[cfg(feature = "ui")]
+        for container in self.game.containers() {
+            container.render(&mut self.engine, &mut EngineState { state }, &mut drawer);
+        }
 
         drawer.collect(
             self.engine.font_system.as_ref().unwrap().clone(),

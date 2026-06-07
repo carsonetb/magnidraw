@@ -17,7 +17,7 @@ impl Game for SpriteDemo {
     }
 
     fn render<'d, 's: 'd>(
-        &'s mut self,
+        &'s self,
         _engine: &mut Engine,
         _state: &mut EngineState,
         drawer: &mut Drawer<'d>,
