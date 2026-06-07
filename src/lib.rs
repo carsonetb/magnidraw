@@ -54,6 +54,16 @@ pub trait Game {
     }
 
     #[cfg(feature = "ui")]
+    fn messages(
+        &mut self,
+        engine: &mut Engine,
+        state: &mut EngineState,
+        messages: Vec<crate::ui::Message>,
+    ) {
+        let _ = (engine, state, messages);
+    }
+
+    #[cfg(feature = "ui")]
     fn containers(&self) -> Vec<&crate::ui::Container> {
         Vec::new()
     }

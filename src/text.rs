@@ -2,7 +2,7 @@ use std::{cell::RefCell, ops::DerefMut, rc::Rc, u32};
 
 use keydraw::state::State;
 
-use crate::{Color, Pos};
+use crate::{Color, Pos, Size};
 
 pub struct Text {
     buffer: glyphon::Buffer,
@@ -14,6 +14,18 @@ pub struct Text {
 }
 
 impl Text {
+    pub fn size(&self) -> Size {
+        let mut width: f32 = 0.0;
+        let mut height: f32 = 0.0;
+
+        for run in self.buffer.layout_runs() {
+            width = width.max(run.line_w);
+            height += run.line_height;
+        }
+
+        Size::new(width, height)
+    }
+
     pub(crate) fn new(
         font_system: &mut glyphon::FontSystem,
         text: &str,

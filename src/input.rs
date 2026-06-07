@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use gilrs::Gilrs;
 use winit_input_helper::WinitInputHelper;
 
-use crate::{AnyAxis, KeyboardButton, MouseButton};
+use crate::{AnyAxis, KeyboardButton, MouseButton, Pos};
 
 #[macro_export]
 macro_rules! __keycode {
@@ -256,6 +256,11 @@ impl<'a> Input<'a> {
     pub fn axis(&self, neg: Button, pos: Button) -> f32 {
         let out = -self.button_axis(neg) + self.button_axis(pos);
         if out.abs() > self.deadzone { out } else { 0.0 }
+    }
+
+    pub fn mouse_pos(&self) -> Option<Pos> {
+        let pos = self.input.cursor()?;
+        Some(Pos::new(pos.0, pos.1))
     }
 
     /// Sets the threshold at which a joystick axis is considered pressed.

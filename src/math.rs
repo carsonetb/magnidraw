@@ -1,12 +1,69 @@
+use std::ops::{Add, Div, Mul, Sub};
+
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 pub struct Pos {
     pub x: f32,
     pub y: f32,
 }
 
+impl Add for Pos {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self {
+        Self::new(self.x + rhs.x, self.y + rhs.y)
+    }
+}
+
+impl Sub for Pos {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self {
+        Self::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl Mul<Pos> for Pos {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self {
+        Self::new(self.x * rhs.x, self.y * rhs.y)
+    }
+}
+
+impl Mul<f32> for Pos {
+    type Output = Self;
+
+    fn mul(self, rhs: f32) -> Self {
+        Self::new(self.x * rhs, self.y * rhs)
+    }
+}
+
+impl Div<Pos> for Pos {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self {
+        Self::new(self.x / rhs.x, self.y / rhs.y)
+    }
+}
+
+impl Div<f32> for Pos {
+    type Output = Self;
+
+    fn div(self, rhs: f32) -> Self {
+        Self::new(self.x / rhs, self.y / rhs)
+    }
+}
+
 impl Pos {
     pub fn new(x: f32, y: f32) -> Self {
         Self { x, y }
+    }
+
+    pub fn inside(&self, rect: Rect) -> bool {
+        self.x > rect.pos.x
+            && self.x < rect.pos.x + rect.size.w
+            && self.y > rect.pos.y
+            && self.y < rect.pos.y + rect.size.h
     }
 }
 
@@ -19,6 +76,42 @@ pub struct Size {
 impl Size {
     pub fn new(w: f32, h: f32) -> Self {
         Self { w, h }
+    }
+
+    pub fn as_pos(self) -> Pos {
+        Pos::new(self.w, self.h)
+    }
+}
+
+impl Mul<Size> for Size {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Self::new(self.w * rhs.w, self.h * rhs.h)
+    }
+}
+
+impl Mul<f32> for Size {
+    type Output = Self;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        Self::new(self.w * rhs, self.h * rhs)
+    }
+}
+
+impl Div<Size> for Size {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        Self::new(self.w / rhs.w, self.h / rhs.h)
+    }
+}
+
+impl Div<f32> for Size {
+    type Output = Self;
+
+    fn div(self, rhs: f32) -> Self::Output {
+        Self::new(self.w / rhs, self.h / rhs)
     }
 }
 
@@ -52,6 +145,13 @@ impl Rect {
 
     pub fn new_basic(pos: Pos, size: Size) -> Self {
         Self { pos, size }
+    }
+
+    pub fn center(&self) -> Pos {
+        Pos::new(
+            self.pos.x + self.size.w / 2.0,
+            self.pos.y + self.size.h / 2.0,
+        )
     }
 }
 

@@ -111,8 +111,17 @@ impl Program for EngineHolder {
             .update(&mut self.engine, &mut EngineState { state }, &input);
 
         #[cfg(feature = "ui")]
-        for container in self.game.containers_mut() {
-            container.update(&mut self.engine, &mut EngineState { state }, &input);
+        {
+            let mut messages = Vec::new();
+            for container in self.game.containers_mut() {
+                messages.append(&mut container.update(
+                    &mut self.engine,
+                    &mut EngineState { state },
+                    &input,
+                ));
+            }
+            self.game
+                .messages(&mut self.engine, &mut EngineState { state }, messages);
         }
 
         self.engine.input = took_input;
