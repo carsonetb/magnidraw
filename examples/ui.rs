@@ -1,7 +1,8 @@
 use magnidraw::{
     Color, Engine, EngineState, Game, Input, Pos, Rect, TextAlign,
     ui::{
-        Container, Label, Message, MessageContent, SepDirection, Separator, Theme, UIButton, UIRect,
+        Container, Label, Margin, Message, MessageContent, SepDirection, Separator, Theme,
+        UIButton, UIRect,
     },
 };
 
@@ -30,6 +31,8 @@ impl Game for UIDemo {
             Some(engine.load_text("Button Text", 32.0, Some(theme.font))),
         ));
 
+        let button_margin = Box::new(Margin::new(button, 20.0, 15.0, 10.0, 30.0));
+
         let rect = Box::new(UIRect::new(Color::BLACK));
 
         let label = Box::new(Label::new(
@@ -55,7 +58,7 @@ impl Game for UIDemo {
             magnidraw::ui::SepDirection::Vertical,
             0.8,
             Some(bottom),
-            Some(button),
+            Some(button_margin),
         ));
 
         // Create the container which is a rectangle that contains the button

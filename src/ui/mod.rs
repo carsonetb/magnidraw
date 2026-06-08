@@ -7,12 +7,14 @@ use crate::{Drawer, Engine, EngineState, Input, Rect, Size};
 
 mod button;
 mod label;
+mod margin;
 mod rect;
 mod separator;
 mod theme;
 
 pub use button::*;
 pub use label::*;
+pub use margin::*;
 pub use rect::*;
 pub use separator::*;
 pub use theme::*;
