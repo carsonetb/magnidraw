@@ -1,5 +1,6 @@
 use std::ops::{Add, Div, Mul, Sub};
 
+/// Represents a position in 2D space, in pixels.
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 pub struct Pos {
     pub x: f32,
@@ -59,6 +60,7 @@ impl Pos {
         Self { x, y }
     }
 
+    /// Check if this point is inside a [`Rect`].
     pub fn inside(&self, rect: Rect) -> bool {
         self.x > rect.pos.x
             && self.x < rect.pos.x + rect.size.w
@@ -67,6 +69,7 @@ impl Pos {
     }
 }
 
+/// Representing a 2D size, in pixels.
 #[derive(Debug, Clone, Copy)]
 pub struct Size {
     pub w: f32,
@@ -115,6 +118,7 @@ impl Div<f32> for Size {
     }
 }
 
+/// Represents a 2D scale.
 #[derive(Debug, Clone, Copy)]
 pub struct Scale {
     pub x: f32,
@@ -129,9 +133,12 @@ impl Scale {
     pub const ONE: Self = Self::new(1.0, 1.0);
 }
 
+/// Represents a rectangle in 2D space.
 #[derive(Debug, Clone, Copy)]
 pub struct Rect {
+    /// The top-left corner of the rectangle.
     pub pos: Pos,
+    /// The diameters of the rectangle.
     pub size: Size,
 }
 
@@ -155,6 +162,7 @@ impl Rect {
     }
 }
 
+/// A simple RGB color, from 0.0-1.0.
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
     pub r: f32,

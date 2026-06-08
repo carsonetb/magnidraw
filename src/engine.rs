@@ -180,6 +180,8 @@ pub struct Engine {
 }
 
 impl Engine {
+    /// Set the basic color the window clears to every frame.
+    /// No, turning down the alpha will not make the window transparent 😭
     pub fn set_clear_color(&mut self, state: &mut EngineState, color: Color) {
         state.state.clear_color = wgpu::Color {
             r: color.r as f64,
@@ -189,6 +191,7 @@ impl Engine {
         };
     }
 
+    /// Load an image. You can get the bytes by using the include_bytes! macro.
     pub fn load_sprite(&mut self, state: &mut EngineState, bytes: &'static [u8]) -> Sprite {
         Sprite::new(
             "Unnamed Sprite",
@@ -198,6 +201,8 @@ impl Engine {
         )
     }
 
+    /// Load a font, this can be used later via the string. You can get the
+    /// bytes by using the include_bytes! macro.
     pub fn load_font(&self, bytes: &'static [u8]) {
         self.font_system
             .as_ref()
@@ -208,6 +213,7 @@ impl Engine {
             .load_font_data(bytes.to_vec());
     }
 
+    /// Create a Text object, do not do this every frame.
     pub fn load_text(&self, text: &str, font_size: f32, family: Option<&'static str>) -> Text {
         Text::new(
             self.font_system.as_ref().unwrap().borrow_mut().deref_mut(),
@@ -219,6 +225,7 @@ impl Engine {
         )
     }
 
+    /// After changing properties of the Text, use this to apply those changes.
     pub fn reload_text(&self, text: &mut Text) {
         text.reload(self.font_system.as_ref().unwrap().borrow_mut().deref_mut());
     }
@@ -336,9 +343,9 @@ impl Engine {
             &VertexBuilder::new(&rectext_shader)
                 .with_simple_vertex_buffer()
                 .with_buffer(wgpu::VertexBufferLayout {
-                    array_stride: size_of::<f32>() as u64 * 12,
+                    array_stride: size_of::<f32>() as u64 * 19,
                     step_mode: wgpu::VertexStepMode::Instance,
-                    attributes: &wgpu::vertex_attr_array![2 => Float32x4, 3 => Float32x4, 4 => Float32x4],
+                    attributes: &wgpu::vertex_attr_array![2 => Float32x4, 3 => Float32x4, 4 => Float32x4, 5 => Float32, 6 => Float32x4],
                 }),
             &FragmentBuilder::new(&rectext_shader).with_alpha_target(state),
         )

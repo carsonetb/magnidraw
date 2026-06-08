@@ -1,6 +1,7 @@
 use image::GenericImageView;
 use keydraw::state::State;
 
+/// A sprite which can be drawn.
 pub struct Sprite {
     pub(crate) material: u32,
     pub width: f32,

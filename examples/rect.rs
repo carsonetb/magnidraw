@@ -36,6 +36,8 @@ impl Game for SpriteDemo {
             40.0,
             50.0,
             400.0,
+            15.0,
+            Color::rgb(0.8, 0.4, 0.3),
         );
     }
 }

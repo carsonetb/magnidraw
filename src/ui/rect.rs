@@ -5,6 +5,7 @@ use crate::{
     ui::{Element, get_id},
 };
 
+/// A simple colored UI rect.
 pub struct UIRect {
     pub color: Color,
     id: u32,

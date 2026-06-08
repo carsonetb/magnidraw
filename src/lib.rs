@@ -53,6 +53,7 @@ pub trait Game {
         let _ = (engine, state, input);
     }
 
+    /// Process all the messages submitted by the UI [`ui::Container`]s.
     #[cfg(feature = "ui")]
     fn messages(
         &mut self,
@@ -63,11 +64,13 @@ pub trait Game {
         let _ = (engine, state, messages);
     }
 
+    /// Get all the UI Containers this program is currently using.
     #[cfg(feature = "ui")]
     fn containers(&self) -> Vec<&crate::ui::Container> {
         Vec::new()
     }
 
+    /// Mutably get all the UI Containers this program is currently using.
     #[cfg(feature = "ui")]
     fn containers_mut(&mut self) -> Vec<&mut crate::ui::Container> {
         Vec::new()

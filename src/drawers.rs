@@ -7,6 +7,9 @@ use crate::{
     text::{Text, TextBatch},
 };
 
+/// The drawer visits the [`crate::Game`] during the render phase to accumulate
+/// draw commands. It enables simplified drawing of things like rectangles,
+/// sprites, text, and more in the future.
 pub struct Drawer<'a> {
     basic_material: u32,
     rect_pipeline: u32,
@@ -40,6 +43,7 @@ impl<'a> Drawer<'a> {
 
     const RECT_INDICES: [u16; 6] = [0, 2, 3, 0, 3, 1];
 
+    /// Draw an image onto the screen.
     pub fn sprite(&mut self, z_index: i32, sprite: &Sprite, pos: Pos, scale: Scale, color: Color) {
         let mut data = bytemuck::cast_slice(&[
             pos.x,
@@ -76,6 +80,7 @@ impl<'a> Drawer<'a> {
         }
     }
 
+    /// Draw text onto the screen.
     pub fn text(&mut self, z_index: i32, text: &'a Text, pos: Pos, color: Color) {
         if let Some(texts) = self.text_db.get_mut(&z_index) {
             texts.push((text, pos, color));
@@ -84,6 +89,7 @@ impl<'a> Drawer<'a> {
         }
     }
 
+    /// Draw a basic colored rectangle onto the screen.
     pub fn rect(&mut self, z_index: i32, rect: Rect, color: Color) {
         let mut data = bytemuck::cast_slice(&[
             rect.pos.x,
@@ -112,6 +118,8 @@ impl<'a> Drawer<'a> {
         }
     }
 
+    /// Draw a more complex rectangle onto the screen, with border radii,
+    /// border width, and border color.
     pub fn rect_ext(
         &mut self,
         z_index: i32,
@@ -121,6 +129,8 @@ impl<'a> Drawer<'a> {
         tr: f32,
         bl: f32,
         br: f32,
+        border_width: f32,
+        border_color: Color,
     ) {
         let [tl, tr, bl, br] =
             [tl, tr, bl, br].map(|n| n.min(rect.size.w / 2.0).min(rect.size.h / 2.0));
@@ -138,6 +148,11 @@ impl<'a> Drawer<'a> {
             tr,
             bl,
             br,
+            border_width,
+            border_color.r,
+            border_color.g,
+            border_color.b,
+            border_color.a,
         ])
         .to_vec();
 
