@@ -1,7 +1,7 @@
-use std::cell::RefCell;
+use std::{cell::RefCell, ops::Deref};
 
 use crate::{
-    Color, Drawer, Engine, EngineState, Input, Rect, Size, Text, TextAlign,
+    Color, Cursor, Drawer, Engine, EngineState, Input, Rect, Size, Text, TextAlign,
     ui::{Element, Message, get_id},
 };
 
@@ -42,12 +42,19 @@ impl Element for Label {
     fn update(
         &mut self,
         engine: &mut Engine,
-        _state: &mut EngineState,
-        _input: &Input,
+        state: &mut EngineState,
+        input: &Input,
     ) -> Vec<Message> {
-        self.text.line_length = Some(self.rect.borrow().size.w);
+        let rect = *self.rect.borrow().deref();
+        self.text.line_length = Some(rect.size.w);
         self.text.align(self.align);
         engine.reload_text(&mut self.text);
+
+        if let Some(pos) = input.mouse_pos()
+            && pos.inside(rect)
+        {
+            state.set_cursor(Cursor::Default);
+        }
 
         Vec::new()
     }

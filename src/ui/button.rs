@@ -1,7 +1,7 @@
 use std::{cell::RefCell, ops::Deref};
 
 use crate::{
-    Button, Color, Drawer, Engine, EngineState, Input, MouseButton, Rect, Size, Text,
+    Button, Color, Cursor, Drawer, Engine, EngineState, Input, MouseButton, Rect, Size, Text,
     ui::{Element, Message, MessageContent, Theme, get_id},
 };
 
@@ -97,7 +97,7 @@ impl Element for UIButton {
     fn update(
         &mut self,
         _engine: &mut Engine,
-        _state: &mut EngineState,
+        state: &mut EngineState,
         input: &Input,
     ) -> Vec<Message> {
         let mouse_pos = match input.mouse_pos() {
@@ -110,6 +110,8 @@ impl Element for UIButton {
 
         let mut out = Vec::new();
         if mouse_pos.inside(self.rect.borrow().deref().clone()) {
+            state.set_cursor(Cursor::Pointer);
+
             if input.button_pressed(Button::Mouse(MouseButton::Left)) {
                 self.is_pressed = true;
             } else {

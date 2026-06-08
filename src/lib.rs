@@ -15,7 +15,9 @@ pub use input::{AxisDirection, Button, ControllerAxis, ControllerButton, Input, 
 pub use math::*;
 pub use sprite::Sprite;
 pub use text::Text;
-pub use winit::{event::MouseButton, keyboard::KeyCode as KeyboardButton};
+pub use winit::{
+    event::MouseButton, keyboard::KeyCode as KeyboardButton, window::CursorIcon as Cursor,
+};
 
 use crate::engine::EngineHolder;
 

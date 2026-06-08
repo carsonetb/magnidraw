@@ -17,7 +17,7 @@ use winit::{dpi::LogicalPosition, window::Fullscreen};
 use winit_input_helper::WinitInputHelper;
 
 use crate::{
-    AnyAxis, Color, Drawer, Game, Input, Pos, Size, Sprite, Text,
+    AnyAxis, Color, Cursor, Drawer, Game, Input, Pos, Size, Sprite, Text,
     input::{Controller, ControllerButton},
 };
 
@@ -62,6 +62,10 @@ impl<'a> EngineState<'a> {
     pub fn window_size(&self) -> Size {
         let size = self.state.window.inner_size();
         Size::new(size.width as f32, size.height as f32)
+    }
+
+    pub fn set_cursor(&self, cursor: Cursor) {
+        self.state.window.set_cursor(cursor);
     }
 }
 

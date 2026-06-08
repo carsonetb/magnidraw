@@ -1,5 +1,7 @@
+use std::cell::RefCell;
+
 use crate::{
-    Color, Drawer, Engine, EngineState, Input, Rect, Size,
+    Color, Cursor, Drawer, Engine, EngineState, Input, Rect, Size,
     ui::{Element, Message, get_id},
 };
 
@@ -20,6 +22,8 @@ pub struct Separator {
     pub factor: f32,
     pub first: Option<Box<dyn Element>>,
     pub second: Option<Box<dyn Element>>,
+    rect: RefCell<Rect>,
+    sep_rect: Rect,
     id: u32,
 }
 
@@ -37,6 +41,8 @@ impl Separator {
             factor,
             first,
             second,
+            rect: RefCell::new(Rect::new(0.0, 0.0, 0.0, 0.0)),
+            sep_rect: Rect::new(0.0, 0.0, 0.0, 0.0),
             id: get_id(),
         }
     }
@@ -65,29 +71,29 @@ impl Element for Separator {
             SepDirection::Horizontal => Rect::new(
                 rect.pos.x,
                 rect.pos.y,
-                rect.size.w * self.factor,
+                rect.size.w * self.factor - self.params.width / 2.0,
                 rect.size.h,
             ),
             SepDirection::Vertical => Rect::new(
                 rect.pos.x,
                 rect.pos.y,
                 rect.size.w,
-                rect.size.h * self.factor,
+                rect.size.h * self.factor - self.params.width / 2.0,
             ),
         };
 
         let second_rect = match self.direction {
             SepDirection::Horizontal => Rect::new(
-                rect.pos.x + rect.size.w * self.factor,
+                rect.pos.x + rect.size.w * self.factor + self.params.width / 2.0,
                 rect.pos.y,
-                rect.size.w * (1.0 - self.factor),
+                rect.size.w * (1.0 - self.factor) - self.params.width,
                 rect.size.h,
             ),
             SepDirection::Vertical => Rect::new(
                 rect.pos.x,
-                rect.pos.y + rect.size.h * self.factor,
+                rect.pos.y + rect.size.h * self.factor + self.params.width / 2.0,
                 rect.size.w,
-                rect.size.h * (1.0 - self.factor),
+                rect.size.h * (1.0 - self.factor) - self.params.width,
             ),
         };
 
@@ -103,22 +109,9 @@ impl Element for Separator {
             None => (),
         }
 
-        let rect = match self.direction {
-            SepDirection::Horizontal => Rect::new(
-                rect.pos.x + rect.size.w * self.factor - self.params.width / 2.0,
-                rect.pos.y,
-                self.params.width,
-                rect.size.h,
-            ),
-            SepDirection::Vertical => Rect::new(
-                rect.pos.x,
-                rect.pos.y + rect.size.h * self.factor - self.params.width / 2.0,
-                rect.size.w,
-                self.params.width,
-            ),
-        };
+        drawer.rect(z_index, self.sep_rect, self.params.color);
 
-        drawer.rect(z_index, rect, self.params.color);
+        self.rect.replace(rect);
     }
 
     fn update(
@@ -135,6 +128,31 @@ impl Element for Separator {
 
         if let Some(second) = &mut self.second {
             out.append(&mut second.update(engine, state, input));
+        }
+
+        let rect = self.rect.borrow();
+        self.sep_rect = match self.direction {
+            SepDirection::Horizontal => Rect::new(
+                rect.pos.x + rect.size.w * self.factor - self.params.width / 2.0,
+                rect.pos.y,
+                self.params.width,
+                rect.size.h,
+            ),
+            SepDirection::Vertical => Rect::new(
+                rect.pos.x,
+                rect.pos.y + rect.size.h * self.factor - self.params.width / 2.0,
+                rect.size.w,
+                self.params.width,
+            ),
+        };
+
+        if let Some(pos) = input.mouse_pos()
+            && pos.inside(self.sep_rect)
+        {
+            match self.direction {
+                SepDirection::Horizontal => state.set_cursor(Cursor::EwResize),
+                SepDirection::Vertical => state.set_cursor(Cursor::NsResize),
+            }
         }
 
         out
