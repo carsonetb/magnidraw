@@ -1,6 +1,6 @@
 use crate::{
-    Color, Drawer, Engine, EngineState, Rect, Size,
-    ui::{Element, get_id},
+    Color, Drawer, Engine, EngineState, Input, Rect, Size,
+    ui::{Element, Message, get_id},
 };
 
 pub enum SepDirection {
@@ -8,6 +8,7 @@ pub enum SepDirection {
     Vertical,
 }
 
+#[derive(Clone, Copy)]
 pub struct SeparatorParams {
     pub width: f32,
     pub color: Color,
@@ -26,13 +27,14 @@ impl Separator {
     pub fn new(
         params: SeparatorParams,
         direction: SepDirection,
+        factor: f32,
         first: Option<Box<dyn Element>>,
         second: Option<Box<dyn Element>>,
     ) -> Self {
         Self {
             params,
             direction,
-            factor: 0.5,
+            factor,
             first,
             second,
             id: get_id(),
@@ -41,6 +43,16 @@ impl Separator {
 }
 
 impl Element for Separator {
+    fn setup(&mut self, engine: &mut Engine, state: &mut EngineState) {
+        if let Some(first) = &mut self.first {
+            first.setup(engine, state);
+        }
+
+        if let Some(second) = &mut self.second {
+            second.setup(engine, state);
+        }
+    }
+
     fn render<'frame, 'app: 'frame>(
         &'app self,
         engine: &mut Engine,
@@ -95,18 +107,37 @@ impl Element for Separator {
             SepDirection::Horizontal => Rect::new(
                 rect.pos.x + rect.size.w * self.factor - self.params.width / 2.0,
                 rect.pos.y,
-                rect.size.w,
                 self.params.width,
+                rect.size.h,
             ),
             SepDirection::Vertical => Rect::new(
                 rect.pos.x,
                 rect.pos.y + rect.size.h * self.factor - self.params.width / 2.0,
+                rect.size.w,
                 self.params.width,
-                rect.size.h,
             ),
         };
 
         drawer.rect(z_index, rect, self.params.color);
+    }
+
+    fn update(
+        &mut self,
+        engine: &mut Engine,
+        state: &mut EngineState,
+        input: &Input,
+    ) -> Vec<Message> {
+        let mut out = Vec::new();
+
+        if let Some(first) = &mut self.first {
+            out.append(&mut first.update(engine, state, input));
+        }
+
+        if let Some(second) = &mut self.second {
+            out.append(&mut second.update(engine, state, input));
+        }
+
+        out
     }
 
     fn children(&mut self) -> Vec<&Box<dyn Element>> {
@@ -133,8 +164,11 @@ impl Element for Separator {
             .as_ref()
             .map_or(Size::new(0.0, 0.0), |s| s.min_size());
         match self.direction {
-            SepDirection::Horizontal => Size::new(first.w + second.w, first.h.max(second.h)),
-            SepDirection::Vertical => Size::new(first.w.max(second.w), first.h + second.h),
+            // TODO: This is wrong
+            SepDirection::Horizontal => {
+                Size::new(first.w.max(second.w) * 2.0, first.h.max(second.h))
+            }
+            SepDirection::Vertical => Size::new(first.w.max(second.w), first.h.max(second.h) * 2.0),
         }
     }
 

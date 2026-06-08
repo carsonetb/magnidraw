@@ -76,6 +76,22 @@ pub struct Size {
     pub h: f32,
 }
 
+impl Add for Size {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self {
+        Size::new(self.w + rhs.w, self.h + rhs.h)
+    }
+}
+
+impl Sub for Size {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self {
+        Size::new(self.w - rhs.w, self.h - rhs.h)
+    }
+}
+
 impl Size {
     pub fn new(w: f32, h: f32) -> Self {
         Self { w, h }
@@ -180,8 +196,12 @@ impl Color {
         Self { r, g, b, a }
     }
 
-    pub const fn rgb255(r: f32, g: f32, b: f32) -> Self {
-        Self::rgb(r / 255.0, g / 255.0, b / 255.0)
+    fn correct(c: f32) -> f32 {
+        ((c / 255.0 + 0.055) / 1.055).powf(2.4)
+    }
+
+    pub fn rgb255(r: f32, g: f32, b: f32) -> Self {
+        Self::rgb(Self::correct(r), Self::correct(g), Self::correct(b))
     }
 
     pub const WHITE: Self = Self::rgb(1.0, 1.0, 1.0);

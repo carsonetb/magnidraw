@@ -2,7 +2,7 @@ use std::{cell::RefCell, ops::DerefMut, rc::Rc, u32};
 
 use keydraw::state::State;
 
-use crate::{Color, Pos, Size};
+use crate::{Color, Pos, Size, TextAlign};
 
 pub struct Text {
     buffer: glyphon::Buffer,
@@ -24,6 +24,12 @@ impl Text {
         }
 
         Size::new(width, height)
+    }
+
+    pub fn align(&mut self, align: TextAlign) {
+        for line in self.buffer.lines.iter_mut() {
+            line.set_align(Some(align));
+        }
     }
 
     pub(crate) fn new(

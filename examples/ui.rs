@@ -1,6 +1,8 @@
 use magnidraw::{
-    Engine, EngineState, Game, Rect,
-    ui::{Container, Message, MessageContent, Theme, UIButton},
+    Color, Engine, EngineState, Game, Input, Pos, Rect, TextAlign,
+    ui::{
+        Container, Label, Message, MessageContent, SepDirection, Separator, Theme, UIButton, UIRect,
+    },
 };
 
 // Make sure to run this example with --example ui.
@@ -28,21 +30,54 @@ impl Game for UIDemo {
             Some(engine.load_text("Button Text", 32.0, Some(theme.font))),
         ));
 
+        let rect = Box::new(UIRect::new(Color::BLACK));
+
+        let label = Box::new(Label::new(
+            engine.load_text(
+                "Someone should write an essay here: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean bibendum sem a nisi eleifend, at malesuada lectus tristique. Nulla pharetra auctor magna eget rutrum. Donec non malesuada odio, ac convallis turpis. Proin in orci sodales, molestie leo eget, malesuada nibh. Vivamus eu risus sollicitudin, rhoncus lectus vitae, facilisis sapien. Suspendisse quam orci, tincidunt eget semper sed, blandit nec sapien. Integer consectetur venenatis metus euismod cursus. Aliquam eu velit in diam placerat ornare. ",
+                20.0,
+                Some(theme.font),
+            ),
+            TextAlign::Center,
+            Color::WHITE,
+        ));
+
+        let bottom = Box::new(Separator::new(
+            theme.separators,
+            SepDirection::Horizontal,
+            0.3,
+            Some(rect),
+            Some(label),
+        ));
+
+        let stack = Box::new(Separator::new(
+            theme.separators,
+            magnidraw::ui::SepDirection::Vertical,
+            0.8,
+            Some(bottom),
+            Some(button),
+        ));
+
         // Create the container which is a rectangle that contains the button
         // element.
         self.container = Some(Container::new(
-            Rect::new(10.0, 10.0, 200.0, 300.0),
+            Rect::new_basic(Pos::new(0.0, 0.0), state.window_size()),
             0,
-            "Rect".to_string(),
-            button,
+            "UI".to_string(),
+            stack,
         ));
+    }
+
+    fn update(&mut self, _engine: &mut Engine, state: &mut EngineState, _input: &Input) {
+        self.container.as_mut().unwrap().rect =
+            Rect::new_basic(Pos::new(0.0, 0.0), state.window_size())
     }
 
     fn messages(&mut self, _engine: &mut Engine, _state: &mut EngineState, messages: Vec<Message>) {
         // Process all the messages to check if the button was pressed.
         let container = self.container.as_mut().unwrap();
         for message in messages {
-            if message.from == container.element.id() {
+            if message.from == container.element.children()[0].id() {
                 match message.content {
                     MessageContent::ButtonPress => container.rect.pos.x += 50.0,
                     _ => (),

@@ -6,11 +6,13 @@ use std::{
 use crate::{Drawer, Engine, EngineState, Input, Rect, Size};
 
 mod button;
+mod label;
 mod rect;
 mod separator;
 mod theme;
 
 pub use button::*;
+pub use label::*;
 pub use rect::*;
 pub use separator::*;
 pub use theme::*;
@@ -76,7 +78,7 @@ pub trait Element {
     fn children(&mut self) -> Vec<&Box<dyn Element>>;
 
     /// Minimum size of this Element. The minimum size of children should be
-    /// taken account if they are present.
+    /// taken into account if they are present.
     fn min_size(&self) -> Size;
 
     /// ID of this element, for sending [`Message`]s. You can use the [`get_id`]
@@ -153,7 +155,6 @@ impl Container {
                 "Cannot render container '{}' properly. Its width or height is smaller than the minimum size of the element it contains.",
                 self.name
             );
-            return;
         }
 
         self.element

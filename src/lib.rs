@@ -10,6 +10,7 @@ pub mod ui;
 pub use drawers::Drawer;
 pub use engine::{Engine, EngineState};
 pub use gilrs::Axis as AnyAxis;
+pub use glyphon::cosmic_text::Align as TextAlign;
 pub use input::{AxisDirection, Button, ControllerAxis, ControllerButton, Input, keycode};
 pub use math::*;
 pub use sprite::Sprite;
