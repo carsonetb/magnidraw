@@ -1,6 +1,6 @@
 use magnidraw::{
-    Color, Engine, EngineState, Game, Rect,
-    ui::{Container, Message, MessageContent, UIButton, UIButtonParams},
+    Engine, EngineState, Game, Rect,
+    ui::{Container, Message, MessageContent, Theme, UIButton},
 };
 
 // Make sure to run this example with --example ui.
@@ -17,18 +17,16 @@ impl UIDemo {
 }
 
 impl Game for UIDemo {
-    fn setup(&mut self, engine: &mut Engine, _state: &mut EngineState) {
+    fn setup(&mut self, engine: &mut Engine, state: &mut EngineState) {
+        // Create the theme for our UI.
+        let theme = Theme::nord();
+        engine.apply_theme(state, theme);
+
         // Create the button with all its parameters.
-        let button = Box::new(UIButton::new(UIButtonParams {
-            text: Some(engine.load_text("Button Text", 32.0, None)),
-            text_color: Color::BLACK,
-            color: Color::WHITE,
-            hover_color: Color::rgb(0.7, 0.6, 0.5),
-            press_color: Color::rgb(0.5, 0.5, 0.5),
-            radii: [10.0, 10.0, 10.0, 10.0],
-            border_width: 2.0,
-            border_color: Color::rgb(0.7, 0.7, 0.7),
-        }));
+        let button = Box::new(UIButton::with_theme(
+            theme,
+            Some(engine.load_text("Button Text", 32.0, Some(theme.font))),
+        ));
 
         // Create the container which is a rectangle that contains the button
         // element.

@@ -1,7 +1,5 @@
 use std::{
     any::Any,
-    cell::RefCell,
-    rc::Rc,
     sync::atomic::{AtomicU32, Ordering},
 };
 
@@ -9,9 +7,13 @@ use crate::{Drawer, Engine, EngineState, Input, Rect, Size};
 
 mod button;
 mod rect;
+mod separator;
+mod theme;
 
 pub use button::*;
 pub use rect::*;
+pub use separator::*;
+pub use theme::*;
 
 static ID_COUNTER: AtomicU32 = AtomicU32::new(0);
 
@@ -64,9 +66,14 @@ pub trait Element {
         Vec::new()
     }
 
+    /// Set the theme of this Element, propogating to all child Elements.
+    fn apply_theme(&mut self, theme: Theme) {
+        let _ = theme;
+    }
+
     /// All the children of this Element. An Element may have any number of
     /// children.
-    fn children(&mut self) -> Vec<Rc<RefCell<dyn Element>>>;
+    fn children(&mut self) -> Vec<&Box<dyn Element>>;
 
     /// Minimum size of this Element. The minimum size of children should be
     /// taken account if they are present.
@@ -127,6 +134,11 @@ impl Container {
             name,
             element,
         }
+    }
+
+    /// Set the theme of all [`Element`]s in this Container.
+    pub fn apply_theme(&mut self, theme: Theme) {
+        self.element.apply_theme(theme);
     }
 
     pub(crate) fn render<'frame, 'app: 'frame>(

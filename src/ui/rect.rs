@@ -1,5 +1,3 @@
-use std::{cell::RefCell, rc::Rc};
-
 use crate::{
     Color, Drawer, Engine, EngineState, Rect, Size,
     ui::{Element, get_id},
@@ -36,7 +34,7 @@ impl Element for UIRect {
         self.id
     }
 
-    fn children(&mut self) -> Vec<Rc<RefCell<dyn Element>>> {
+    fn children(&mut self) -> Vec<&Box<dyn Element>> {
         Vec::new()
     }
 

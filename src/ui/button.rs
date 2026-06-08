@@ -1,14 +1,13 @@
-use std::{cell::RefCell, ops::Deref, rc::Rc};
+use std::{cell::RefCell, ops::Deref};
 
 use crate::{
     Button, Color, Drawer, Engine, EngineState, Input, MouseButton, Rect, Size, Text,
-    ui::{Element, Message, MessageContent, get_id},
+    ui::{Element, Message, MessageContent, Theme, get_id},
 };
 
-/// Use these to cingure how a button looks.
+/// Use these to configure how a button looks.
+#[derive(Clone, Copy)]
 pub struct UIButtonParams {
-    /// Optionally, the text displayed in the middle of the button.
-    pub text: Option<Text>,
     pub text_color: Color,
     /// Background color of the button.
     pub color: Color,
@@ -23,24 +22,10 @@ pub struct UIButtonParams {
     pub border_color: Color,
 }
 
-impl UIButtonParams {
-    /// A basic button with text and a background, just a rectangle.
-    pub fn basic(color: Color, text: Text, text_color: Color) -> Self {
-        Self {
-            text: Some(text),
-            text_color,
-            color,
-            hover_color: color,
-            press_color: color,
-            radii: [0.0, 0.0, 0.0, 0.0],
-            border_width: 0.0,
-            border_color: color,
-        }
-    }
-}
-
 /// A pressable button.
 pub struct UIButton {
+    /// Optionally, the text displayed in the middle of the button.
+    pub text: Option<Text>,
     params: UIButtonParams,
     is_hovered: bool,
     is_pressed: bool,
@@ -49,14 +34,19 @@ pub struct UIButton {
 }
 
 impl UIButton {
-    pub fn new(params: UIButtonParams) -> Self {
+    pub fn new(params: UIButtonParams, text: Option<Text>) -> Self {
         Self {
+            text,
             params,
             is_hovered: false,
             is_pressed: false,
             rect: RefCell::new(Rect::new(0.0, 0.0, 0.0, 0.0)),
             id: get_id(),
         }
+    }
+
+    pub fn with_theme(theme: Theme, text: Option<Text>) -> Self {
+        Self::new(theme.buttons, text)
     }
 }
 
@@ -86,11 +76,11 @@ impl Element for UIButton {
             self.params.radii[1],
             self.params.radii[2],
             self.params.radii[3],
-            5.0,
-            Color::WHITE,
+            self.params.border_width,
+            self.params.border_color,
         );
 
-        match &self.params.text {
+        match &self.text {
             Some(text) => {
                 let size = text.size();
                 drawer.text(
@@ -134,12 +124,22 @@ impl Element for UIButton {
         out
     }
 
-    fn children(&mut self) -> Vec<Rc<RefCell<dyn Element>>> {
+    fn apply_theme(&mut self, theme: Theme) {
+        self.params = theme.buttons;
+    }
+
+    fn children(&mut self) -> Vec<&Box<dyn Element>> {
         Vec::new()
     }
 
     fn min_size(&self) -> crate::Size {
-        Size::new(0.0, 0.0)
+        match &self.text {
+            Some(text) => text.size(),
+            None => Size::new(
+                self.params.radii[0] + self.params.radii[1],
+                self.params.radii[2] + self.params.radii[3],
+            ),
+        }
     }
 
     fn id(&self) -> u32 {

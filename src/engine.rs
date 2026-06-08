@@ -230,6 +230,11 @@ impl Engine {
         text.reload(self.font_system.as_ref().unwrap().borrow_mut().deref_mut());
     }
 
+    #[cfg(feature = "ui")]
+    pub fn apply_theme(&mut self, state: &mut EngineState, theme: crate::ui::Theme) {
+        self.set_clear_color(state, theme.clear_color);
+    }
+
     fn new() -> Self {
         Self {
             camera_buffer: None,

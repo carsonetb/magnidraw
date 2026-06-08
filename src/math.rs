@@ -180,6 +180,10 @@ impl Color {
         Self { r, g, b, a }
     }
 
+    pub const fn rgb255(r: f32, g: f32, b: f32) -> Self {
+        Self::rgb(r / 255.0, g / 255.0, b / 255.0)
+    }
+
     pub const WHITE: Self = Self::rgb(1.0, 1.0, 1.0);
     pub const BLACK: Self = Self::rgb(0.0, 0.0, 0.0);
 }

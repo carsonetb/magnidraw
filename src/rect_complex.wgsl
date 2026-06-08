@@ -73,9 +73,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     let dist = sd_rounded_box(pixel_pos, half_size, in.rounding);
 
-    var alpha = 1.0 - smoothstep(0.0, 1.0, dist);
-
-    if alpha < 0.0 {
+    if dist > 0.0 {
         discard;
     }
 
@@ -84,5 +82,5 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         color = in.border_color;
     }
 
-    return vec4(color.rgb, color.a * alpha);
+    return vec4(color.rgb, color.a);
 }
