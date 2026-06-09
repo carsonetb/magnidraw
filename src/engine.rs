@@ -3,7 +3,6 @@ use std::{
     collections::{HashMap, HashSet},
     ops::DerefMut,
     rc::Rc,
-    sync::Arc,
 };
 
 use gilrs::Gilrs;
@@ -14,10 +13,10 @@ use keydraw::{
     state::State,
 };
 use wgpu::util::DeviceExt;
-use window_clipboard::{Clipboard, ClipboardProvider};
+use window_clipboard::Clipboard;
 use winit::{
     dpi::{LogicalPosition, LogicalSize},
-    window::{Fullscreen, Window},
+    window::Fullscreen,
 };
 use winit_input_helper::WinitInputHelper;
 

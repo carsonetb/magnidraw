@@ -118,7 +118,7 @@ impl Element for UIButton {
                 self.is_hovered = true;
             }
 
-            if input.button_just_presed(Button::Mouse(MouseButton::Left)) {
+            if input.button_just_pressed(Button::Mouse(MouseButton::Left)) {
                 out.push(Message::new(self, MessageContent::ButtonPress));
             }
         }

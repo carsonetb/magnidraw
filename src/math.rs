@@ -70,7 +70,7 @@ impl Pos {
 }
 
 /// Representing a 2D size, in pixels.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Size {
     pub w: f32,
     pub h: f32,

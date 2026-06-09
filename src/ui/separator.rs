@@ -1,7 +1,9 @@
 use std::cell::RefCell;
 
+use winit::event::MouseButton;
+
 use crate::{
-    Color, Cursor, Drawer, Engine, EngineState, Input, Rect, Size,
+    Button, Color, Cursor, Drawer, Engine, EngineState, Input, Rect, Size,
     ui::{Element, Message, get_id},
 };
 
@@ -24,6 +26,7 @@ pub struct Separator {
     pub second: Option<Box<dyn Element>>,
     rect: RefCell<Rect>,
     sep_rect: Rect,
+    dragged: bool,
     id: u32,
 }
 
@@ -43,6 +46,7 @@ impl Separator {
             second,
             rect: RefCell::new(Rect::new(0.0, 0.0, 0.0, 0.0)),
             sep_rect: Rect::new(0.0, 0.0, 0.0, 0.0),
+            dragged: false,
             id: get_id(),
         }
     }
@@ -152,6 +156,58 @@ impl Element for Separator {
             match self.direction {
                 SepDirection::Horizontal => state.set_cursor(Cursor::EwResize),
                 SepDirection::Vertical => state.set_cursor(Cursor::NsResize),
+            }
+
+            if input.button_just_pressed(Button::Mouse(MouseButton::Left)) {
+                self.dragged = true;
+            }
+        }
+
+        if input.button_released(Button::Mouse(MouseButton::Left)) {
+            self.dragged = false;
+        }
+
+        if self.dragged
+            && input.button_pressed(Button::Mouse(MouseButton::Left))
+            && let Some(pos) = input.mouse_pos()
+        {
+            let old = self.factor;
+            self.factor = match self.direction {
+                SepDirection::Horizontal => {
+                    let left = rect.pos.x;
+                    let right = rect.pos.x + rect.size.w;
+                    (pos.x - left) / (right - left)
+                }
+                SepDirection::Vertical => {
+                    let top = rect.pos.y;
+                    let bottom = rect.pos.y + rect.size.h;
+                    (pos.y - top) / (bottom - top)
+                }
+            };
+
+            let (first_max, second_max) = match self.direction {
+                SepDirection::Horizontal => {
+                    (rect.size.w * self.factor, rect.size.w * (1.0 - self.factor))
+                }
+                SepDirection::Vertical => {
+                    (rect.size.h * self.factor, rect.size.h * (1.0 - self.factor))
+                }
+            };
+
+            let first_min = self
+                .first
+                .as_ref()
+                .map_or(Size::new(0.0, 0.0), |f| f.min_size());
+            let second_min = self
+                .second
+                .as_ref()
+                .map_or(Size::new(0.0, 0.0), |s| s.min_size());
+
+            if match self.direction {
+                SepDirection::Horizontal => first_min.w > first_max || second_min.w > second_max,
+                SepDirection::Vertical => first_min.h > first_max || second_min.h > second_max,
+            } {
+                self.factor = old;
             }
         }
 

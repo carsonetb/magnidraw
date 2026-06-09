@@ -207,7 +207,7 @@ impl<'a> Input<'a> {
     }
 
     /// Check if a button wasn't pressed last frame, and now is.
-    pub fn button_just_presed(&self, button: Button) -> bool {
+    pub fn button_just_pressed(&self, button: Button) -> bool {
         match button {
             Button::Controller(button) => {
                 !self.prev_buttons.contains(&button) && self.current_buttons.contains(&button)

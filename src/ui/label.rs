@@ -155,7 +155,7 @@ impl Element for Label {
             }
 
             if set {
-                if input.button_just_presed(Button::Mouse(MouseButton::Left)) {
+                if input.button_just_pressed(Button::Mouse(MouseButton::Left)) {
                     if let Some(cursor) = self
                         .text
                         .inner_buffer()
@@ -174,7 +174,7 @@ impl Element for Label {
         if let Some(text) = self.text.editor.copy_selection()
             && (input.button_pressed(Button::Keyboard(KeyboardButton::ControlLeft))
                 || input.button_pressed(Button::Keyboard(KeyboardButton::ControlRight)))
-            && input.button_just_presed(Button::Keyboard(KeyboardButton::KeyC))
+            && input.button_just_pressed(Button::Keyboard(KeyboardButton::KeyC))
         {
             engine.copy(text);
         }
