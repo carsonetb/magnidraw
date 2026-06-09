@@ -13,7 +13,10 @@ use keydraw::{
     state::State,
 };
 use wgpu::util::DeviceExt;
-use winit::{dpi::LogicalPosition, window::Fullscreen};
+use winit::{
+    dpi::{LogicalPosition, LogicalSize},
+    window::Fullscreen,
+};
 use winit_input_helper::WinitInputHelper;
 
 use crate::{
@@ -67,6 +70,12 @@ impl<'a> EngineState<'a> {
     pub fn set_cursor(&self, cursor: Cursor) {
         self.state.window.set_cursor(cursor);
     }
+
+    pub fn set_window_min_size(&self, size: Size) {
+        self.state
+            .window
+            .set_min_inner_size(Some(LogicalSize::new(size.w, size.h)));
+    }
 }
 
 pub(crate) struct EngineHolder {
@@ -85,6 +94,9 @@ impl EngineHolder {
 
 impl Program for EngineHolder {
     fn init(&mut self, state: &mut State) {
+        state
+            .window
+            .set_max_inner_size(Some(LogicalSize::new(8000.0, 8000.0)));
         self.engine.init(state);
         self.game
             .setup(&mut self.engine, &mut EngineState { state });

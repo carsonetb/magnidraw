@@ -183,10 +183,16 @@ impl Element for Separator {
             .map_or(Size::new(0.0, 0.0), |s| s.min_size());
         match self.direction {
             // TODO: This is wrong
-            SepDirection::Horizontal => {
-                Size::new(first.w.max(second.w) * 2.0, first.h.max(second.h))
-            }
-            SepDirection::Vertical => Size::new(first.w.max(second.w), first.h.max(second.h) * 2.0),
+            SepDirection::Horizontal => Size::new(
+                (first.w + first.w / self.factor * (1.0 - self.factor))
+                    .max(second.w + second.w / (1.0 - self.factor) * self.factor),
+                first.h.max(second.h),
+            ),
+            SepDirection::Vertical => Size::new(
+                first.w.max(second.w),
+                (first.h + first.h / self.factor * (1.0 - self.factor))
+                    .max(second.h + second.h / (1.0 - self.factor) * self.factor),
+            ),
         }
     }
 

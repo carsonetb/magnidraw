@@ -73,7 +73,8 @@ impl Game for UIDemo {
 
     fn update(&mut self, _engine: &mut Engine, state: &mut EngineState, _input: &Input) {
         self.container.as_mut().unwrap().rect =
-            Rect::new_basic(Pos::new(0.0, 0.0), state.window_size())
+            Rect::new_basic(Pos::new(0.0, 0.0), state.window_size());
+        state.set_window_min_size(self.container.as_ref().unwrap().element.min_size());
     }
 
     fn messages(&mut self, _engine: &mut Engine, _state: &mut EngineState, messages: Vec<Message>) {

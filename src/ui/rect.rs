@@ -37,7 +37,7 @@ impl Element for UIRect {
 
     fn update(
         &mut self,
-        engine: &mut Engine,
+        _engine: &mut Engine,
         state: &mut EngineState,
         input: &crate::Input,
     ) -> Vec<super::Message> {

@@ -64,7 +64,7 @@ impl Element for Label {
     }
 
     fn min_size(&self) -> Size {
-        self.text.size()
+        self.text.size() - Size::new(150.0, 0.0)
     }
 
     fn id(&self) -> u32 {

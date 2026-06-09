@@ -154,8 +154,8 @@ impl Container {
         let min = self.element.min_size();
         if self.rect.size.w < min.w || self.rect.size.h < min.h {
             println!(
-                "Cannot render container '{}' properly. Its width or height is smaller than the minimum size of the element it contains.",
-                self.name
+                "Cannot render container '{}' properly. Its width or height is smaller than the minimum size of the element it contains, which is {:?}",
+                self.name, min
             );
         }
 
