@@ -1,8 +1,8 @@
 use magnidraw::{
     Color, Engine, EngineState, Game, Input, Pos, Rect, TextAlign,
     ui::{
-        Container, Label, Margin, Message, MessageContent, SepDirection, Separator, Theme,
-        UIButton, UIRect,
+        Container, Direction, Element, Label, Margin, Message, MessageContent, Separator, Stack,
+        StackItemMode, StackMode, Theme, UIButton, UIRect,
     },
 };
 
@@ -31,9 +31,15 @@ impl Game for UIDemo {
             Some(engine.load_text("Button Text", 32.0, Some(theme.font))),
         ));
 
-        let button_margin = Box::new(Margin::new(button, 20.0, 15.0, 10.0, 30.0));
+        let button_margin = Box::new(Margin::new(button, 7.0, 7.0, 7.0, 7.0));
 
         let rect = Box::new(UIRect::new(Color::BLACK));
+
+        let mut stack: Vec<(Box<dyn Element>, StackItemMode)> = vec![(rect, StackItemMode::Expand)];
+        for _ in 0..10 {
+            stack.push((button_margin.clone(), StackItemMode::Compress));
+        }
+        let stack = Box::new(Stack::new(Direction::Vertical, StackMode::Delegate, stack));
 
         let label = Box::new(Label::new(
             engine.load_text(
@@ -47,15 +53,15 @@ impl Game for UIDemo {
 
         let bottom = Box::new(Separator::new(
             theme.separators,
-            SepDirection::Horizontal,
+            Direction::Horizontal,
             0.3,
-            Some(rect),
+            Some(stack),
             Some(label),
         ));
 
-        let stack = Box::new(Separator::new(
+        let sum = Box::new(Separator::new(
             theme.separators,
-            magnidraw::ui::SepDirection::Vertical,
+            Direction::Vertical,
             0.8,
             Some(bottom),
             Some(button_margin),
@@ -67,7 +73,7 @@ impl Game for UIDemo {
             Rect::new_basic(Pos::new(0.0, 0.0), state.window_size()),
             0,
             "UI".to_string(),
-            stack,
+            sum,
         ));
     }
 

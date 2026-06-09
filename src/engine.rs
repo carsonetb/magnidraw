@@ -386,7 +386,7 @@ impl Engine {
             &VertexBuilder::new(&rectext_shader)
                 .with_simple_vertex_buffer()
                 .with_buffer(wgpu::VertexBufferLayout {
-                    array_stride: size_of::<f32>() as u64 * 19,
+                    array_stride: size_of::<f32>() as u64 * 17,
                     step_mode: wgpu::VertexStepMode::Instance,
                     attributes: &wgpu::vertex_attr_array![2 => Float32x4, 3 => Float32x4, 4 => Float32x4, 5 => Float32, 6 => Float32x4],
                 }),

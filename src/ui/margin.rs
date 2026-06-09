@@ -5,6 +5,7 @@ use crate::{
     ui::{Element, get_id},
 };
 
+#[derive(Clone)]
 pub struct Margin {
     pub left: f32,
     pub right: f32,

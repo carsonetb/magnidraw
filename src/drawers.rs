@@ -166,7 +166,7 @@ impl<'a> Drawer<'a> {
                     vertices: Self::RECT_VERTICES.to_vec(),
                     indices: Self::RECT_INDICES.to_vec(),
                     instances: data,
-                    stride: size_of::<f32>() as u32 * 12,
+                    stride: size_of::<f32>() as u32 * 17,
                 },
             );
         }

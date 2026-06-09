@@ -23,6 +23,7 @@ pub struct UIButtonParams {
 }
 
 /// A pressable button.
+#[derive(Clone)]
 pub struct UIButton {
     /// Optionally, the text displayed in the middle of the button.
     pub text: Option<Text>,

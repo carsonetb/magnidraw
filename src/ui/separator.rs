@@ -4,13 +4,8 @@ use winit::event::MouseButton;
 
 use crate::{
     Button, Color, Cursor, Drawer, Engine, EngineState, Input, Rect, Size,
-    ui::{Element, Message, get_id},
+    ui::{Direction, Element, Message, get_id},
 };
-
-pub enum SepDirection {
-    Horizontal,
-    Vertical,
-}
 
 #[derive(Clone, Copy)]
 pub struct SeparatorParams {
@@ -18,9 +13,10 @@ pub struct SeparatorParams {
     pub color: Color,
 }
 
+#[derive(Clone)]
 pub struct Separator {
     params: SeparatorParams,
-    pub direction: SepDirection,
+    pub direction: Direction,
     pub factor: f32,
     pub first: Option<Box<dyn Element>>,
     pub second: Option<Box<dyn Element>>,
@@ -33,7 +29,7 @@ pub struct Separator {
 impl Separator {
     pub fn new(
         params: SeparatorParams,
-        direction: SepDirection,
+        direction: Direction,
         factor: f32,
         first: Option<Box<dyn Element>>,
         second: Option<Box<dyn Element>>,
@@ -72,13 +68,13 @@ impl Element for Separator {
         rect: Rect,
     ) {
         let first_rect = match self.direction {
-            SepDirection::Horizontal => Rect::new(
+            Direction::Horizontal => Rect::new(
                 rect.pos.x,
                 rect.pos.y,
                 rect.size.w * self.factor - self.params.width / 2.0,
                 rect.size.h,
             ),
-            SepDirection::Vertical => Rect::new(
+            Direction::Vertical => Rect::new(
                 rect.pos.x,
                 rect.pos.y,
                 rect.size.w,
@@ -87,13 +83,13 @@ impl Element for Separator {
         };
 
         let second_rect = match self.direction {
-            SepDirection::Horizontal => Rect::new(
+            Direction::Horizontal => Rect::new(
                 rect.pos.x + rect.size.w * self.factor + self.params.width / 2.0,
                 rect.pos.y,
                 rect.size.w * (1.0 - self.factor) - self.params.width,
                 rect.size.h,
             ),
-            SepDirection::Vertical => Rect::new(
+            Direction::Vertical => Rect::new(
                 rect.pos.x,
                 rect.pos.y + rect.size.h * self.factor + self.params.width / 2.0,
                 rect.size.w,
@@ -136,13 +132,13 @@ impl Element for Separator {
 
         let rect = self.rect.borrow();
         self.sep_rect = match self.direction {
-            SepDirection::Horizontal => Rect::new(
+            Direction::Horizontal => Rect::new(
                 rect.pos.x + rect.size.w * self.factor - self.params.width / 2.0,
                 rect.pos.y,
                 self.params.width,
                 rect.size.h,
             ),
-            SepDirection::Vertical => Rect::new(
+            Direction::Vertical => Rect::new(
                 rect.pos.x,
                 rect.pos.y + rect.size.h * self.factor - self.params.width / 2.0,
                 rect.size.w,
@@ -154,8 +150,8 @@ impl Element for Separator {
             && pos.inside(self.sep_rect)
         {
             match self.direction {
-                SepDirection::Horizontal => state.set_cursor(Cursor::EwResize),
-                SepDirection::Vertical => state.set_cursor(Cursor::NsResize),
+                Direction::Horizontal => state.set_cursor(Cursor::EwResize),
+                Direction::Vertical => state.set_cursor(Cursor::NsResize),
             }
 
             if input.button_just_pressed(Button::Mouse(MouseButton::Left)) {
@@ -172,42 +168,45 @@ impl Element for Separator {
             && let Some(pos) = input.mouse_pos()
         {
             let old = self.factor;
+            let ignore = self.min_size().w < rect.size.w || self.min_size().h < rect.size.h;
             self.factor = match self.direction {
-                SepDirection::Horizontal => {
+                Direction::Horizontal => {
                     let left = rect.pos.x;
                     let right = rect.pos.x + rect.size.w;
                     (pos.x - left) / (right - left)
                 }
-                SepDirection::Vertical => {
+                Direction::Vertical => {
                     let top = rect.pos.y;
                     let bottom = rect.pos.y + rect.size.h;
                     (pos.y - top) / (bottom - top)
                 }
             };
 
-            let (first_max, second_max) = match self.direction {
-                SepDirection::Horizontal => {
-                    (rect.size.w * self.factor, rect.size.w * (1.0 - self.factor))
-                }
-                SepDirection::Vertical => {
-                    (rect.size.h * self.factor, rect.size.h * (1.0 - self.factor))
-                }
-            };
+            if !ignore {
+                let (first_max, second_max) = match self.direction {
+                    Direction::Horizontal => {
+                        (rect.size.w * self.factor, rect.size.w * (1.0 - self.factor))
+                    }
+                    Direction::Vertical => {
+                        (rect.size.h * self.factor, rect.size.h * (1.0 - self.factor))
+                    }
+                };
 
-            let first_min = self
-                .first
-                .as_ref()
-                .map_or(Size::new(0.0, 0.0), |f| f.min_size());
-            let second_min = self
-                .second
-                .as_ref()
-                .map_or(Size::new(0.0, 0.0), |s| s.min_size());
+                let first_min = self
+                    .first
+                    .as_ref()
+                    .map_or(Size::new(0.0, 0.0), |f| f.min_size());
+                let second_min = self
+                    .second
+                    .as_ref()
+                    .map_or(Size::new(0.0, 0.0), |s| s.min_size());
 
-            if match self.direction {
-                SepDirection::Horizontal => first_min.w > first_max || second_min.w > second_max,
-                SepDirection::Vertical => first_min.h > first_max || second_min.h > second_max,
-            } {
-                self.factor = old;
+                if match self.direction {
+                    Direction::Horizontal => first_min.w > first_max || second_min.w > second_max,
+                    Direction::Vertical => first_min.h > first_max || second_min.h > second_max,
+                } {
+                    self.factor = old;
+                }
             }
         }
 
@@ -239,12 +238,12 @@ impl Element for Separator {
             .map_or(Size::new(0.0, 0.0), |s| s.min_size());
         match self.direction {
             // TODO: This is wrong
-            SepDirection::Horizontal => Size::new(
+            Direction::Horizontal => Size::new(
                 (first.w + first.w / self.factor * (1.0 - self.factor))
                     .max(second.w + second.w / (1.0 - self.factor) * self.factor),
                 first.h.max(second.h),
             ),
-            SepDirection::Vertical => Size::new(
+            Direction::Vertical => Size::new(
                 first.w.max(second.w),
                 (first.h + first.h / self.factor * (1.0 - self.factor))
                     .max(second.h + second.h / (1.0 - self.factor) * self.factor),

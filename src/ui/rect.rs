@@ -6,6 +6,7 @@ use crate::{
 };
 
 /// A simple colored UI rect.
+#[derive(Clone)]
 pub struct UIRect {
     pub color: Color,
     rect: RefCell<Rect>,

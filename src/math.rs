@@ -1,4 +1,7 @@
-use std::ops::{Add, Div, Mul, Sub};
+use std::{
+    iter::Sum,
+    ops::{Add, Div, Mul, Sub},
+};
 
 /// Represents a position in 2D space, in pixels.
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
@@ -74,6 +77,16 @@ impl Pos {
 pub struct Size {
     pub w: f32,
     pub h: f32,
+}
+
+impl Sum for Size {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        let mut total = Size::new(0.0, 0.0);
+        for item in iter {
+            total = total + item;
+        }
+        total
+    }
 }
 
 impl Add for Size {

@@ -10,16 +10,25 @@ mod label;
 mod margin;
 mod rect;
 mod separator;
+mod stack;
 mod theme;
 
 pub use button::*;
+use dyn_clone::{DynClone, clone_trait_object};
 pub use label::*;
 pub use margin::*;
 pub use rect::*;
 pub use separator::*;
+pub use stack::*;
 pub use theme::*;
 
 static ID_COUNTER: AtomicU32 = AtomicU32::new(0);
+
+#[derive(Debug, Clone, Copy)]
+pub enum Direction {
+    Horizontal,
+    Vertical,
+}
 
 /// Create a new, incremental ID for UI elements.
 pub fn get_id() -> u32 {
@@ -31,7 +40,7 @@ pub fn get_id() -> u32 {
 /// Elements are the core of the UI system. They are contained by either a
 /// [`Container`] or another Element. They have a set of child Elements, which
 /// it is responsible for drawing.
-pub trait Element {
+pub trait Element: DynClone {
     /// Similar to the function [`crate::Game::setup`], this function is called
     /// when the Element is first registered.
     fn setup(&mut self, engine: &mut Engine, state: &mut EngineState) {
@@ -87,6 +96,8 @@ pub trait Element {
     /// function to easily make one.
     fn id(&self) -> u32;
 }
+
+clone_trait_object!(Element);
 
 /// A Message which is passed up from an [`Element`] to be processed by the
 /// [`crate::Game`].

@@ -15,6 +15,7 @@ pub struct LabelParams {
     pub selection_color: Color,
 }
 
+#[derive(Clone)]
 pub struct Label {
     pub params: LabelParams,
     pub text: Text,
