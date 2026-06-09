@@ -3,6 +3,7 @@ use std::{
     collections::{HashMap, HashSet},
     ops::DerefMut,
     rc::Rc,
+    sync::Arc,
 };
 
 use gilrs::Gilrs;
@@ -13,9 +14,10 @@ use keydraw::{
     state::State,
 };
 use wgpu::util::DeviceExt;
+use window_clipboard::{Clipboard, ClipboardProvider};
 use winit::{
     dpi::{LogicalPosition, LogicalSize},
-    window::Fullscreen,
+    window::{Fullscreen, Window},
 };
 use winit_input_helper::WinitInputHelper;
 
@@ -198,9 +200,16 @@ pub struct Engine {
     prev_axes: HashMap<(Controller, AnyAxis), f32>,
     axis_press_threshold: f32,
     deadzone: f32,
+
+    // Misc
+    clipboard: Option<Clipboard>,
 }
 
 impl Engine {
+    pub fn get_font_system(&self) -> Rc<RefCell<glyphon::FontSystem>> {
+        self.font_system.as_ref().unwrap().clone()
+    }
+
     /// Set the basic color the window clears to every frame.
     /// No, turning down the alpha will not make the window transparent 😭
     pub fn set_clear_color(&mut self, state: &mut EngineState, color: Color) {
@@ -251,6 +260,14 @@ impl Engine {
         text.reload(self.font_system.as_ref().unwrap().borrow_mut().deref_mut());
     }
 
+    pub fn copy(&mut self, text: String) {
+        self.clipboard.as_mut().unwrap().write(text).unwrap();
+    }
+
+    pub fn paste(&mut self) -> String {
+        self.clipboard.as_ref().unwrap().read().unwrap()
+    }
+
     #[cfg(feature = "ui")]
     pub fn apply_theme(&mut self, state: &mut EngineState, theme: crate::ui::Theme) {
         self.set_clear_color(state, theme.clear_color);
@@ -275,6 +292,7 @@ impl Engine {
             prev_axes: HashMap::new(),
             axis_press_threshold: 0.5,
             deadzone: 0.2,
+            clipboard: None,
         }
     }
 
@@ -331,7 +349,7 @@ impl Engine {
                 .device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                     label: Some("Rect Render Layout"),
-                    bind_group_layouts: &[&camera_bind_group_layout],
+                    bind_group_layouts: &[Some(&camera_bind_group_layout)],
                     immediate_size: 0,
                 });
         let rect_pipeline = PipelineBuilder::new(
@@ -360,7 +378,7 @@ impl Engine {
                 .device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                     label: Some("RectExt Pipeline Layout"),
-                    bind_group_layouts: &[&camera_bind_group_layout],
+                    bind_group_layouts: &[Some(&camera_bind_group_layout)],
                     immediate_size: 0,
                 });
         let rectext_pipeline = PipelineBuilder::new(
@@ -415,7 +433,10 @@ impl Engine {
                 .device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                     label: Some("Sprite Pipeline Layout"),
-                    bind_group_layouts: &[&camera_bind_group_layout, &sprite_bind_group_layout],
+                    bind_group_layouts: &[
+                        Some(&camera_bind_group_layout),
+                        Some(&sprite_bind_group_layout),
+                    ],
                     immediate_size: 0,
                 });
         let sprite_pipeline = PipelineBuilder::new(
@@ -469,6 +490,8 @@ impl Engine {
         self.viewport = Some(viewport);
 
         state.enable_vsync();
+
+        self.clipboard = Some(unsafe { Clipboard::connect(state.window.as_ref()).unwrap() });
     }
 
     fn event(&mut self, event: &winit::event::WindowEvent, state: &mut State) {

@@ -1,11 +1,12 @@
 use std::{cell::RefCell, ops::DerefMut, rc::Rc, u32};
 
+use glyphon::Edit;
 use keydraw::state::State;
 
 use crate::{Color, Pos, Size, TextAlign};
 
 pub struct Text {
-    buffer: glyphon::Buffer,
+    pub editor: glyphon::Editor<'static>,
     pub text: String,
     pub font_size: f32,
     pub line_height: f32,
@@ -14,11 +15,25 @@ pub struct Text {
 }
 
 impl Text {
+    pub fn inner_buffer(&self) -> &glyphon::Buffer {
+        match self.editor.buffer_ref() {
+            glyphon::cosmic_text::BufferRef::Owned(buffer) => buffer,
+            _ => panic!(),
+        }
+    }
+
+    pub fn inner_buffer_mut(&mut self) -> &mut glyphon::Buffer {
+        match self.editor.buffer_ref_mut() {
+            glyphon::cosmic_text::BufferRef::Owned(buffer) => buffer,
+            _ => panic!(),
+        }
+    }
+
     pub fn size(&self) -> Size {
         let mut width: f32 = 0.0;
         let mut height: f32 = 0.0;
 
-        for run in self.buffer.layout_runs() {
+        for run in self.inner_buffer().layout_runs() {
             width = width.max(run.line_w);
             height += run.line_height;
         }
@@ -27,7 +42,7 @@ impl Text {
     }
 
     pub fn align(&mut self, align: TextAlign) {
-        for line in self.buffer.lines.iter_mut() {
+        for line in self.inner_buffer_mut().lines.iter_mut() {
             line.set_align(Some(align));
         }
     }
@@ -43,8 +58,10 @@ impl Text {
         let buffer =
             glyphon::Buffer::new(font_system, glyphon::Metrics::new(font_size, line_height));
 
+        let editor = glyphon::Editor::new(buffer);
+
         let mut out = Self {
-            buffer,
+            editor,
             text: text.to_string(),
             font_size,
             line_height,
@@ -57,19 +74,17 @@ impl Text {
     }
 
     pub(crate) fn reload(&mut self, font_system: &mut glyphon::FontSystem) {
-        self.buffer.set_size(font_system, self.line_length, None);
-        self.buffer.set_text(
-            font_system,
-            &self.text,
-            &glyphon::Attrs::new().family(if let Some(family) = self.family {
-                glyphon::Family::Name(&family)
-            } else {
-                glyphon::Family::SansSerif
-            }),
-            glyphon::Shaping::Advanced,
-            None,
-        );
-        self.buffer.shape_until_scroll(font_system, false);
+        let attrs = &glyphon::Attrs::new().family(if let Some(family) = self.family {
+            glyphon::Family::Name(&family)
+        } else {
+            glyphon::Family::SansSerif
+        });
+        let text = self.text.clone();
+        let line_length = self.line_length;
+        let buffer = self.inner_buffer_mut();
+        buffer.set_size(line_length, None);
+        buffer.set_text(&text, attrs, glyphon::Shaping::Advanced, None);
+        buffer.shape_until_scroll(font_system, false);
     }
 }
 
@@ -93,7 +108,7 @@ impl<'a> keydraw::ComplexCommand for TextBatch<'a> {
             .texts
             .iter()
             .map(|(text, pos, color)| glyphon::TextArea {
-                buffer: &text.buffer,
+                buffer: &text.inner_buffer(),
                 left: pos.x,
                 top: pos.y,
                 scale: 1.0,

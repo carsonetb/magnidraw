@@ -22,7 +22,7 @@ impl UIDemo {
 impl Game for UIDemo {
     fn setup(&mut self, engine: &mut Engine, state: &mut EngineState) {
         // Create the theme for our UI.
-        let theme = Theme::nord();
+        let theme = Theme::catppuccin_latte();
         engine.apply_theme(state, theme);
 
         // Create the button with all its parameters.
@@ -37,12 +37,12 @@ impl Game for UIDemo {
 
         let label = Box::new(Label::new(
             engine.load_text(
-                "Someone should write an essay here: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean bibendum sem a nisi eleifend, at malesuada lectus tristique. Nulla pharetra auctor magna eget rutrum. Donec non malesuada odio, ac convallis turpis. Proin in orci sodales, molestie leo eget, malesuada nibh. Vivamus eu risus sollicitudin, rhoncus lectus vitae, facilisis sapien. Suspendisse quam orci, tincidunt eget semper sed, blandit nec sapien. Integer consectetur venenatis metus euismod cursus. Aliquam eu velit in diam placerat ornare. ",
+                "Someone should write an essay here: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean bibendum sem a nisi eleifend, at malesuada lectus tristique. Nulla pharetra auctor magna eget rutrum. Donec non malesuada odio, ac convallis turpis. \n\nProin in orci sodales, molestie leo eget, malesuada nibh. Vivamus eu risus sollicitudin, rhoncus lectus vitae, facilisis sapien. Suspendisse quam orci, tincidunt eget semper sed, blandit nec sapien. Integer consectetur venenatis metus euismod cursus. Aliquam eu velit in diam placerat ornare. ",
                 20.0,
                 Some(theme.font),
             ),
             TextAlign::Center,
-            Color::WHITE,
+            theme.labels,
         ));
 
         let bottom = Box::new(Separator::new(

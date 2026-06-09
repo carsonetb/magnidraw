@@ -6,12 +6,13 @@ edition = "2024"
 [dependencies]
 keydraw = { git = "https://github.com/carsonetb/keydraw", branch = "trunk" }
 bytemuck = "1.25.0"
-wgpu = "28.0"
-glyphon = "0.10.0"
+wgpu = "29.0.3"
+glyphon = { git = "https://github.com/carsonetb/glyphon", branch = "main" }
 image = "0.25.10"
 winit = "0.30.13"
 winit_input_helper = "0.17.0"
 gilrs = "0.11.2"
+window_clipboard = "0.5.1"
 
 [dev-dependencies]
 rand = "0.10.1"
