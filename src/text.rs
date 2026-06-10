@@ -3,7 +3,7 @@ use std::{cell::RefCell, ops::DerefMut, rc::Rc, u32};
 use glyphon::Edit;
 use keydraw::state::State;
 
-use crate::{Color, Pos, Size, TextAlign};
+use crate::{Color, Pos, Rect, Size, TextAlign};
 
 #[derive(Clone)]
 pub struct Text {
@@ -14,6 +14,7 @@ pub struct Text {
     pub line_length: Option<f32>,
     pub align: TextAlign,
     pub family: Option<&'static str>,
+    pub(crate) clip: Option<glyphon::TextBounds>,
 }
 
 impl Text {
@@ -29,6 +30,15 @@ impl Text {
             glyphon::cosmic_text::BufferRef::Owned(buffer) => buffer,
             _ => panic!(),
         }
+    }
+
+    pub fn set_clip(&mut self, clip: Rect) {
+        self.clip = Some(glyphon::TextBounds {
+            left: clip.pos.x as i32,
+            top: clip.pos.y as i32,
+            right: (clip.pos.x + clip.size.w) as i32,
+            bottom: (clip.pos.y + clip.size.h) as i32,
+        })
     }
 
     pub fn size(&self) -> Size {
@@ -57,6 +67,7 @@ impl Text {
         line_length: Option<f32>,
         family: Option<&'static str>,
         align: TextAlign,
+        clip: Option<glyphon::TextBounds>,
     ) -> Self {
         let buffer =
             glyphon::Buffer::new(font_system, glyphon::Metrics::new(font_size, line_height));
@@ -71,6 +82,7 @@ impl Text {
             line_length,
             family,
             align,
+            clip,
         };
 
         out.reload(font_system);
@@ -108,7 +120,7 @@ pub(crate) struct TextBatch<'a> {
 
 impl<'a> keydraw::ComplexCommand for TextBatch<'a> {
     fn key(&self) -> keydraw::DrawKey {
-        keydraw::DrawKey::new(self.z_index, u32::MAX, &[])
+        keydraw::DrawKey::new(self.z_index, u32::MAX, u32::MAX, &[])
     }
 
     fn prepare(&mut self, state: &State) {
@@ -120,12 +132,12 @@ impl<'a> keydraw::ComplexCommand for TextBatch<'a> {
                 left: pos.x,
                 top: pos.y,
                 scale: 1.0,
-                bounds: glyphon::TextBounds {
+                bounds: text.clip.unwrap_or(glyphon::TextBounds {
                     left: 0,
                     top: 0,
-                    right: state.config.width as i32,
-                    bottom: state.config.height as i32,
-                },
+                    right: state.window.inner_size().width as i32,
+                    bottom: state.window.inner_size().height as i32,
+                }),
                 default_color: glyphon::Color::rgba(
                     (color.r * 255.0) as u8,
                     (color.g * 255.0) as u8,

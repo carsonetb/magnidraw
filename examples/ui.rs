@@ -26,7 +26,13 @@ impl Game for UIDemo {
         engine.apply_theme(state, &theme);
 
         // Create the button with all its parameters.
-        let text = engine.load_text("Button Text", 32.0, Some(theme.font), TextAlign::Center);
+        let text = engine.load_text(
+            "Button Text",
+            32.0,
+            Some(theme.font),
+            TextAlign::Center,
+            None,
+        );
         let button = Box::new(UIButton::with_theme(&theme, Some(text)));
 
         let button_margin = Box::new(Margin::new(button, 7.0, 7.0, 7.0, 7.0));
@@ -43,7 +49,7 @@ impl Game for UIDemo {
             engine.load_text(
                 "Someone should write an essay here: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean bibendum sem a nisi eleifend, at malesuada lectus tristique. Nulla pharetra auctor magna eget rutrum. Donec non malesuada odio, ac convallis turpis. \n\nProin in orci sodales, molestie leo eget, malesuada nibh. Vivamus eu risus sollicitudin, rhoncus lectus vitae, facilisis sapien. Suspendisse quam orci, tincidunt eget semper sed, blandit nec sapien. Integer consectetur venenatis metus euismod cursus. Aliquam eu velit in diam placerat ornare. ",
                 20.0,
-                Some(theme.font), TextAlign::Center
+                Some(theme.font), TextAlign::Center, None
             ),
             TextAlign::Right,
             theme.labels,

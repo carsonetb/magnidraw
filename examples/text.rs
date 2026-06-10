@@ -22,6 +22,7 @@ impl Game for TextDemo {
             50.0,
             Some("Courier Prime"),
             TextAlign::Left,
+            None,
         ));
     }
 

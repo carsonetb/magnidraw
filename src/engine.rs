@@ -21,7 +21,7 @@ use winit::{
 use winit_input_helper::WinitInputHelper;
 
 use crate::{
-    AnyAxis, Color, Cursor, Drawer, Game, Input, Pos, Size, Sprite, Text, TextAlign,
+    AnyAxis, Color, Cursor, Drawer, Game, Input, Pos, Rect, Size, Sprite, Text, TextAlign,
     input::{Controller, ControllerButton},
 };
 
@@ -151,6 +151,10 @@ impl Program for EngineHolder {
     }
 
     fn render(&'_ mut self, state: &mut State) -> Vec<Command<'_>> {
+        let size = state.window.inner_size();
+        self.engine.window_width = size.width as f32;
+        self.engine.window_height = size.height as f32;
+
         let mut drawer = Drawer::new(
             self.engine.camera_material_index,
             self.engine.rect_pipeline_index,
@@ -202,6 +206,8 @@ pub struct Engine {
 
     // Misc
     clipboard: Option<Clipboard>,
+    window_width: f32,
+    window_height: f32,
 }
 
 impl Engine {
@@ -249,7 +255,14 @@ impl Engine {
         font_size: f32,
         family: Option<&'static str>,
         align: TextAlign,
+        region: Option<Rect>,
     ) -> Text {
+        let region = region.map(|region| glyphon::TextBounds {
+            left: region.pos.x as i32,
+            top: region.pos.y as i32,
+            right: (region.pos.x + region.size.w) as i32,
+            bottom: (region.pos.y + region.size.h) as i32,
+        });
         Text::new(
             self.font_system.as_ref().unwrap().borrow_mut().deref_mut(),
             text,
@@ -258,6 +271,7 @@ impl Engine {
             None,
             family,
             align,
+            region,
         )
     }
 
@@ -299,6 +313,8 @@ impl Engine {
             axis_press_threshold: 0.5,
             deadzone: 0.2,
             clipboard: None,
+            window_width: 0.0,
+            window_height: 0.0,
         }
     }
 

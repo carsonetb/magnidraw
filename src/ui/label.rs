@@ -130,6 +130,7 @@ impl Element for Label {
         let rect = *self.rect.borrow().deref();
         self.text.line_length = Some(rect.size.w);
         self.text.align(self.align);
+        self.text.set_clip(rect);
         engine.reload_text(&mut self.text);
 
         if let Some(pos) = input.mouse_pos()

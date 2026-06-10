@@ -68,6 +68,7 @@ impl<'a> Drawer<'a> {
                 SimpleCommand {
                     key: DrawKey::new(
                         z_index,
+                        u32::MAX,
                         self.sprite_pipeline,
                         &[self.basic_material, sprite.material],
                     ),
@@ -108,7 +109,12 @@ impl<'a> Drawer<'a> {
             self.rect_db.insert(
                 z_index,
                 SimpleCommand {
-                    key: DrawKey::new(z_index, self.rect_pipeline, &[self.basic_material]),
+                    key: DrawKey::new(
+                        z_index,
+                        u32::MAX,
+                        self.rect_pipeline,
+                        &[self.basic_material],
+                    ),
                     vertices: Self::RECT_VERTICES.to_vec(),
                     indices: Self::RECT_INDICES.to_vec(),
                     instances: data,
@@ -162,7 +168,12 @@ impl<'a> Drawer<'a> {
             self.rectext_db.insert(
                 z_index,
                 SimpleCommand {
-                    key: DrawKey::new(z_index, self.rectext_pipeline, &[self.basic_material]),
+                    key: DrawKey::new(
+                        z_index,
+                        u32::MAX,
+                        self.rectext_pipeline,
+                        &[self.basic_material],
+                    ),
                     vertices: Self::RECT_VERTICES.to_vec(),
                     indices: Self::RECT_INDICES.to_vec(),
                     instances: data,
