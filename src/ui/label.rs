@@ -9,12 +9,17 @@ use crate::{
     ui::{Element, Message, get_id},
 };
 
+/// Params for [`Label`].
 #[derive(Clone, Copy)]
 pub struct LabelParams {
+    /// The color of the text.
     pub color: Color,
+    /// The color of the selection, or highlight. It should be mostly
+    /// transparent.
     pub selection_color: Color,
 }
 
+/// A simple text element. The user can select text and copy it.
 #[derive(Clone)]
 pub struct Label {
     pub params: LabelParams,

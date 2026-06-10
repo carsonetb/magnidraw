@@ -1,4 +1,4 @@
-use magnidraw::{Color, Drawer, Engine, EngineState, Game, Pos, Text};
+use magnidraw::{Color, Drawer, Engine, EngineState, Game, Pos, Text, TextAlign};
 use rand::seq::IndexedRandom;
 
 pub struct TextDemo {
@@ -17,7 +17,12 @@ impl Game for TextDemo {
         //
         // You can change the text without recreating the object by using
         // Engine::reload_text.
-        self.text = Some(engine.load_text("Hello, World!", 50.0, Some("Courier Prime")));
+        self.text = Some(engine.load_text(
+            "Hello, World!",
+            50.0,
+            Some("Courier Prime"),
+            TextAlign::Left,
+        ));
     }
 
     fn render<'d, 's: 'd>(

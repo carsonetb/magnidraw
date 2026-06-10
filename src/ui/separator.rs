@@ -13,13 +13,19 @@ pub struct SeparatorParams {
     pub color: Color,
 }
 
+/// Separates two elements by some factor. Optionally, the separation line can
+/// be made draggable so the user can modify this factor.
 #[derive(Clone)]
 pub struct Separator {
     params: SeparatorParams,
+    /// If this stacks vertically or horizontally.
     pub direction: Direction,
+    /// From 0.0-1.0, the percentage of the separation line from the left/top
+    /// side to the right/bottom side.
     pub factor: f32,
     pub first: Option<Box<dyn Element>>,
     pub second: Option<Box<dyn Element>>,
+    pub draggable: bool,
     rect: RefCell<Rect>,
     sep_rect: Rect,
     dragged: bool,
@@ -33,6 +39,7 @@ impl Separator {
         factor: f32,
         first: Option<Box<dyn Element>>,
         second: Option<Box<dyn Element>>,
+        draggable: bool,
     ) -> Self {
         Self {
             params,
@@ -40,6 +47,7 @@ impl Separator {
             factor,
             first,
             second,
+            draggable,
             rect: RefCell::new(Rect::new(0.0, 0.0, 0.0, 0.0)),
             sep_rect: Rect::new(0.0, 0.0, 0.0, 0.0),
             dragged: false,
@@ -146,7 +154,8 @@ impl Element for Separator {
             ),
         };
 
-        if let Some(pos) = input.mouse_pos()
+        if self.draggable
+            && let Some(pos) = input.mouse_pos()
             && pos.inside(self.sep_rect)
         {
             match self.direction {
@@ -168,7 +177,6 @@ impl Element for Separator {
             && let Some(pos) = input.mouse_pos()
         {
             let old = self.factor;
-            let ignore = self.min_size().w < rect.size.w || self.min_size().h < rect.size.h;
             self.factor = match self.direction {
                 Direction::Horizontal => {
                     let left = rect.pos.x;
@@ -182,31 +190,29 @@ impl Element for Separator {
                 }
             };
 
-            if !ignore {
-                let (first_max, second_max) = match self.direction {
-                    Direction::Horizontal => {
-                        (rect.size.w * self.factor, rect.size.w * (1.0 - self.factor))
-                    }
-                    Direction::Vertical => {
-                        (rect.size.h * self.factor, rect.size.h * (1.0 - self.factor))
-                    }
-                };
-
-                let first_min = self
-                    .first
-                    .as_ref()
-                    .map_or(Size::new(0.0, 0.0), |f| f.min_size());
-                let second_min = self
-                    .second
-                    .as_ref()
-                    .map_or(Size::new(0.0, 0.0), |s| s.min_size());
-
-                if match self.direction {
-                    Direction::Horizontal => first_min.w > first_max || second_min.w > second_max,
-                    Direction::Vertical => first_min.h > first_max || second_min.h > second_max,
-                } {
-                    self.factor = old;
+            let (first_max, second_max) = match self.direction {
+                Direction::Horizontal => {
+                    (rect.size.w * self.factor, rect.size.w * (1.0 - self.factor))
                 }
+                Direction::Vertical => {
+                    (rect.size.h * self.factor, rect.size.h * (1.0 - self.factor))
+                }
+            };
+
+            let first_min = self
+                .first
+                .as_ref()
+                .map_or(Size::new(0.0, 0.0), |f| f.min_size());
+            let second_min = self
+                .second
+                .as_ref()
+                .map_or(Size::new(0.0, 0.0), |s| s.min_size());
+
+            if match self.direction {
+                Direction::Horizontal => first_min.w > first_max || second_min.w > second_max,
+                Direction::Vertical => first_min.h > first_max || second_min.h > second_max,
+            } {
+                self.factor = old;
             }
         }
 

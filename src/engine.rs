@@ -21,7 +21,7 @@ use winit::{
 use winit_input_helper::WinitInputHelper;
 
 use crate::{
-    AnyAxis, Color, Cursor, Drawer, Game, Input, Pos, Size, Sprite, Text,
+    AnyAxis, Color, Cursor, Drawer, Game, Input, Pos, Size, Sprite, Text, TextAlign,
     input::{Controller, ControllerButton},
 };
 
@@ -243,7 +243,13 @@ impl Engine {
     }
 
     /// Create a Text object, do not do this every frame.
-    pub fn load_text(&self, text: &str, font_size: f32, family: Option<&'static str>) -> Text {
+    pub fn load_text(
+        &self,
+        text: &str,
+        font_size: f32,
+        family: Option<&'static str>,
+        align: TextAlign,
+    ) -> Text {
         Text::new(
             self.font_system.as_ref().unwrap().borrow_mut().deref_mut(),
             text,
@@ -251,6 +257,7 @@ impl Engine {
             font_size + 10.0,
             None,
             family,
+            align,
         )
     }
 
@@ -268,7 +275,7 @@ impl Engine {
     }
 
     #[cfg(feature = "ui")]
-    pub fn apply_theme(&mut self, state: &mut EngineState, theme: crate::ui::Theme) {
+    pub fn apply_theme(&mut self, state: &mut EngineState, theme: &crate::ui::Theme) {
         self.set_clear_color(state, theme.clear_color);
     }
 

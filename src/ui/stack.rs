@@ -3,24 +3,43 @@ use crate::{
     ui::{Direction, Element, get_id},
 };
 
+/// Specifies the display behavior of elements in a [`Stack`] at the micro
+/// level.
 #[derive(Debug, Clone, Copy)]
 pub enum StackItemMode {
+    /// Displays the element at its minimum width/height.
     Compress,
+    /// Expands the element as much as possible within the stack.
     Expand,
 }
 
+/// Specifies stacking behavior at a macro level for [`Stack`].
 #[derive(Debug, Clone, Copy)]
 pub enum StackMode {
+    /// Squishes all elements to the left. Items marked as Expand will also be
+    /// compressed.
     Left,
+    /// Squishes all elements to the center. Items marked as Expand will also be
+    /// compressed.
     Center,
+    /// Squishes all elements to the right. Items marked as Expand will also be
+    /// compressed.
     Right,
+    /// Distributes all elements evenly. Items marked as Expand will also be
+    /// compressed.
     Distribute,
+    /// Delegates to the [`StackItemMode`] of the elements to decide the
+    /// layout. If none are marked as Expand, items will be compressed to the
+    /// left.
     Delegate,
 }
 
+/// Stacks an arbitrary number of elements.
 #[derive(Clone)]
 pub struct Stack {
+    /// The direction in which the elements are stacked.
     pub direction: Direction,
+    /// How the elements should be distributed.
     pub mode: StackMode,
     pub elements: Vec<(Box<dyn Element>, StackItemMode)>,
     id: u32,

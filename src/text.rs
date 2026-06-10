@@ -12,6 +12,7 @@ pub struct Text {
     pub font_size: f32,
     pub line_height: f32,
     pub line_length: Option<f32>,
+    pub align: TextAlign,
     pub family: Option<&'static str>,
 }
 
@@ -55,6 +56,7 @@ impl Text {
         line_height: f32,
         line_length: Option<f32>,
         family: Option<&'static str>,
+        align: TextAlign,
     ) -> Self {
         let buffer =
             glyphon::Buffer::new(font_system, glyphon::Metrics::new(font_size, line_height));
@@ -68,6 +70,7 @@ impl Text {
             line_height,
             line_length,
             family,
+            align,
         };
 
         out.reload(font_system);
@@ -82,10 +85,14 @@ impl Text {
         });
         let text = self.text.clone();
         let line_length = self.line_length;
-        let buffer = self.inner_buffer_mut();
-        buffer.set_size(line_length, None);
-        buffer.set_text(&text, attrs, glyphon::Shaping::Advanced, None);
-        buffer.shape_until_scroll(font_system, false);
+        self.editor.with_buffer_mut(|buffer| {
+            buffer.set_size(line_length, None);
+            buffer.set_text(&text, attrs, glyphon::Shaping::Advanced, None);
+            for line in buffer.lines.iter_mut() {
+                line.set_align(Some(self.align));
+            }
+            buffer.shape_until_scroll(font_system, false);
+        })
     }
 }
 

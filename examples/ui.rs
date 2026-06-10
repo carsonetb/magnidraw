@@ -23,13 +23,11 @@ impl Game for UIDemo {
     fn setup(&mut self, engine: &mut Engine, state: &mut EngineState) {
         // Create the theme for our UI.
         let theme = Theme::catppuccin_latte();
-        engine.apply_theme(state, theme);
+        engine.apply_theme(state, &theme);
 
         // Create the button with all its parameters.
-        let button = Box::new(UIButton::with_theme(
-            theme,
-            Some(engine.load_text("Button Text", 32.0, Some(theme.font))),
-        ));
+        let text = engine.load_text("Button Text", 32.0, Some(theme.font), TextAlign::Center);
+        let button = Box::new(UIButton::with_theme(&theme, Some(text)));
 
         let button_margin = Box::new(Margin::new(button, 7.0, 7.0, 7.0, 7.0));
 
@@ -45,9 +43,9 @@ impl Game for UIDemo {
             engine.load_text(
                 "Someone should write an essay here: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean bibendum sem a nisi eleifend, at malesuada lectus tristique. Nulla pharetra auctor magna eget rutrum. Donec non malesuada odio, ac convallis turpis. \n\nProin in orci sodales, molestie leo eget, malesuada nibh. Vivamus eu risus sollicitudin, rhoncus lectus vitae, facilisis sapien. Suspendisse quam orci, tincidunt eget semper sed, blandit nec sapien. Integer consectetur venenatis metus euismod cursus. Aliquam eu velit in diam placerat ornare. ",
                 20.0,
-                Some(theme.font),
+                Some(theme.font), TextAlign::Center
             ),
-            TextAlign::Center,
+            TextAlign::Right,
             theme.labels,
         ));
 
@@ -57,6 +55,7 @@ impl Game for UIDemo {
             0.3,
             Some(stack),
             Some(label),
+            true,
         ));
 
         let sum = Box::new(Separator::new(
@@ -65,6 +64,7 @@ impl Game for UIDemo {
             0.8,
             Some(bottom),
             Some(button_margin),
+            true,
         ));
 
         // Create the container which is a rectangle that contains the button

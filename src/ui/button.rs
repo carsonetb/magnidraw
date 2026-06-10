@@ -46,7 +46,7 @@ impl UIButton {
         }
     }
 
-    pub fn with_theme(theme: Theme, text: Option<Text>) -> Self {
+    pub fn with_theme(theme: &Theme, text: Option<Text>) -> Self {
         Self::new(theme.buttons, text)
     }
 }

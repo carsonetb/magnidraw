@@ -1,15 +1,19 @@
+use std::{any::Any, collections::HashMap};
+
 use crate::{
     Color,
     ui::{LabelParams, SeparatorParams, UIButtonParams},
 };
 
-#[derive(Clone, Copy)]
+/// A color theme to be used by UI nodes.
 pub struct Theme {
     pub font: &'static str,
     pub clear_color: Color,
     pub buttons: UIButtonParams,
     pub separators: SeparatorParams,
     pub labels: LabelParams,
+    /// Other attributes for custom UI elements.
+    pub other: HashMap<String, Box<dyn Any>>,
 }
 
 impl Theme {
@@ -43,6 +47,7 @@ impl Theme {
                 color: nord_6,
                 selection_color: Color::rgba(nord_4.r, nord_4.g, nord_4.b, 0.2),
             },
+            other: HashMap::new(),
         }
     }
 
@@ -80,6 +85,7 @@ impl Theme {
                 color: text,
                 selection_color: Color::rgba(overlay2.r, overlay2.g, overlay2.b, 0.5),
             },
+            other: HashMap::new(),
         }
     }
 }

@@ -5,6 +5,7 @@ use crate::{
     ui::{Element, get_id},
 };
 
+/// A margin container, giving the element it contains gaps around the sides.
 #[derive(Clone)]
 pub struct Margin {
     pub left: f32,
