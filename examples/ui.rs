@@ -2,7 +2,7 @@ use magnidraw::{
     Color, Engine, EngineState, Game, Input, Pos, Rect, TextAlign,
     ui::{
         Container, Direction, Element, Label, Margin, Message, MessageContent, Separator, Stack,
-        StackItemMode, StackMode, Theme, UIButton, UIRect,
+        StackItemMode, StackMode, TextInput, Theme, UIButton, UIRect,
     },
 };
 
@@ -43,6 +43,14 @@ impl Game for UIDemo {
         for _ in 0..10 {
             stack.push((button_margin.clone(), StackItemMode::Compress));
         }
+        stack.push((
+            Box::new(TextInput::new(
+                engine.load_text("Hello!", 32.0, Some(theme.font), TextAlign::Left, None),
+                theme.text_inputs,
+                Some(engine.load_text("Something", 32.0, Some(theme.font), TextAlign::Left, None)),
+            )),
+            StackItemMode::Compress,
+        ));
         let stack = Box::new(Stack::new(Direction::Vertical, StackMode::Delegate, stack));
 
         let label = Box::new(Label::new(

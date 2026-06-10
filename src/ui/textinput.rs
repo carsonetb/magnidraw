@@ -1,0 +1,262 @@
+use std::{
+    cell::RefCell,
+    ops::{Deref, DerefMut},
+};
+
+use glyphon::{
+    Action, Edit,
+    cosmic_text::{Motion, Selection},
+};
+use winit::event::MouseButton;
+
+use crate::{
+    Button, Color, Cursor, KeyboardButton, Rect, Size, Text,
+    ui::{Element, Message, get_id},
+};
+
+#[derive(Debug, Clone, Copy)]
+pub struct TextInputParams {
+    pub color: Color,
+    pub text_color: Color,
+    pub hint_color: Color,
+    pub selection_color: Color,
+    pub cursor_color: Color,
+    pub cursor_width: f32,
+    pub radii: [f32; 4],
+    pub border_width: f32,
+    pub border_color: Color,
+}
+
+#[derive(Clone)]
+pub struct TextInput {
+    pub params: TextInputParams,
+    pub text: Text,
+    pub hint: Option<Text>,
+    selecting: bool,
+    highlighted: bool,
+    rect: RefCell<Rect>,
+    id: u32,
+}
+
+impl TextInput {
+    pub fn new(text: Text, params: TextInputParams, hint: Option<Text>) -> Self {
+        Self {
+            params,
+            text,
+            hint,
+            selecting: false,
+            highlighted: false,
+            rect: RefCell::new(Rect::new(0.0, 0.0, 0.0, 0.0)),
+            id: get_id(),
+        }
+    }
+}
+
+impl Element for TextInput {
+    fn render<'frame, 'app: 'frame>(
+        &'app self,
+        _engine: &mut crate::Engine,
+        _state: &mut crate::EngineState,
+        drawer: &mut crate::Drawer<'frame>,
+        z_index: i32,
+        rect: Rect,
+    ) {
+        self.rect.replace(rect);
+
+        drawer.rect_ext(
+            z_index,
+            rect,
+            self.params.color,
+            self.params.radii[0],
+            self.params.radii[1],
+            self.params.radii[2],
+            self.params.radii[3],
+            self.params.border_width,
+            self.params.border_color,
+        );
+
+        if self.text.text.is_empty()
+            && let Some(hint) = &self.hint
+        {
+            drawer.text(z_index, hint, rect.pos, self.params.hint_color);
+        } else {
+            drawer.text(z_index, &self.text, rect.pos, self.params.text_color);
+        }
+
+        if let Some((x, y)) = self.text.editor.cursor_position()
+            && (rect.pos.x + x as f32) < rect.pos.x + rect.size.w
+        {
+            drawer.rect(
+                z_index + 1,
+                Rect::new(
+                    rect.pos.x + x as f32,
+                    rect.pos.y + y as f32 + 5.0,
+                    self.params.cursor_width,
+                    self.text.line_height - 10.0,
+                ),
+                self.params.cursor_color,
+            );
+        }
+
+        if let Some((start, end)) = self.text.editor.selection_bounds() {
+            self.text.editor.with_buffer(|buffer| {
+                if let Some(run) = buffer.layout_runs().next() {
+                    let mut min_x = None;
+                    let mut max_x = None;
+
+                    for glyph in run.glyphs {
+                        if glyph.start < start.index || glyph.end > end.index {
+                            continue;
+                        }
+
+                        let left = glyph.x;
+                        let right = glyph.x + glyph.w;
+
+                        min_x = Some(min_x.map_or(left, |m: f32| m.min(left)));
+                        max_x = Some(max_x.map_or(right, |m: f32| m.max(right)));
+                    }
+
+                    if let Some(left) = min_x
+                        && let Some(right) = max_x
+                    {
+                        drawer.rect(
+                            z_index + 1,
+                            Rect::new(
+                                rect.pos.x + left,
+                                rect.pos.y + run.line_top,
+                                right - left,
+                                run.line_height,
+                            ),
+                            self.params.selection_color,
+                        );
+                    }
+                }
+            })
+        }
+    }
+
+    fn update(
+        &mut self,
+        engine: &mut crate::Engine,
+        state: &mut crate::EngineState,
+        input: &crate::Input,
+    ) -> Vec<Message> {
+        let rect = **&self.rect.borrow();
+        self.text.set_clip(rect);
+
+        if let Some(pos) = input.mouse_pos()
+            && pos.inside(rect)
+        {
+            let mut inside = false;
+            if let Some(line) = self.text.inner_buffer().layout_runs().next()
+                && pos.inside(Rect::new(
+                    rect.pos.x,
+                    rect.pos.y + line.line_top,
+                    line.line_w,
+                    line.line_height,
+                ))
+            {
+                inside = true;
+                state.set_cursor(Cursor::Text);
+            } else {
+                state.set_cursor(Cursor::Default);
+            }
+
+            let hit = self
+                .text
+                .inner_buffer()
+                .hit(pos.x - rect.pos.x, pos.y - rect.pos.y);
+
+            if inside {
+                if input.button_just_pressed(Button::Mouse(MouseButton::Left))
+                    && let Some(cursor) = hit
+                {
+                    self.selecting = true;
+                    self.highlighted = true;
+                    self.text.editor.set_cursor(cursor);
+                    self.text.editor.set_selection(Selection::None);
+                }
+            }
+            if self.selecting && input.button_pressed(Button::Mouse(MouseButton::Left)) {
+                if let Some(end) = hit {
+                    if end != self.text.editor.cursor() {
+                        self.text.editor.set_selection(Selection::Normal(end));
+                    } else {
+                        self.text.editor.set_selection(Selection::None);
+                    }
+                }
+            } else {
+                self.selecting = false;
+            }
+        }
+
+        let mut reload = false;
+
+        let text = input.text_pressed();
+        if !text.is_empty() {
+            self.text.editor.insert_string(&text, None);
+            reload = true;
+        };
+
+        {
+            let font_system = engine.get_font_system();
+            let mut borrowed = font_system.borrow_mut();
+            let control = input.button_pressed(Button::Keyboard(KeyboardButton::ControlLeft))
+                || input.button_pressed(Button::Keyboard(KeyboardButton::ControlRight));
+
+            if input.ui_key_pressed(KeyboardButton::ArrowLeft) {
+                self.text.editor.action(
+                    borrowed.deref_mut(),
+                    if control {
+                        Action::Motion(Motion::LeftWord)
+                    } else {
+                        Action::Motion(Motion::Left)
+                    },
+                );
+                self.highlighted = false;
+            }
+
+            if input.ui_key_pressed(KeyboardButton::ArrowRight) {
+                self.text.editor.action(
+                    borrowed.deref_mut(),
+                    if control {
+                        Action::Motion(Motion::RightWord)
+                    } else {
+                        Action::Motion(Motion::Right)
+                    },
+                );
+                self.highlighted = false;
+            }
+
+            if input.ui_key_pressed(KeyboardButton::Backspace) {
+                self.text
+                    .editor
+                    .action(borrowed.deref_mut(), Action::Backspace);
+                reload = true;
+            }
+        }
+
+        if reload {
+            self.text.text = self.text.editor_text();
+            engine.reload_text(&mut self.text);
+        }
+
+        if !self.highlighted {
+            self.text.editor.set_selection(Selection::None);
+        }
+
+        Vec::new()
+    }
+
+    fn children(&mut self) -> Vec<&Box<dyn Element>> {
+        Vec::new()
+    }
+
+    fn min_size(&self) -> Size {
+        Size::new(40.0, self.text.size().h)
+    }
+
+    fn id(&self) -> u32 {
+        self.id
+    }
+}

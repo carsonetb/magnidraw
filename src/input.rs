@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use gilrs::Gilrs;
+use winit::keyboard::NamedKey;
 use winit_input_helper::WinitInputHelper;
 
 use crate::{AnyAxis, KeyboardButton, MouseButton, Pos};
@@ -279,6 +280,23 @@ impl<'a> Input<'a> {
     /// controller buttons?
     pub fn ui_key_pressed(&self, keycode: KeyboardButton) -> bool {
         self.input.key_pressed_os(keycode)
+    }
+
+    pub fn text_pressed(&self) -> String {
+        self.input
+            .text()
+            .iter()
+            .filter_map(|key| match key {
+                winit::keyboard::Key::Named(named) => match named {
+                    NamedKey::Space => Some(" ".to_string()),
+                    _ => None,
+                },
+                winit::keyboard::Key::Character(what) => Some(what.to_string()),
+                winit::keyboard::Key::Unidentified(_) => None,
+                winit::keyboard::Key::Dead(_) => None,
+            })
+            .collect::<Vec<_>>()
+            .join("")
     }
 
     /// Get the time since the previous frame.

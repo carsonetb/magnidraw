@@ -59,6 +59,17 @@ impl Text {
         }
     }
 
+    pub fn editor_text(&self) -> String {
+        self.editor.with_buffer(|buffer| {
+            buffer
+                .lines
+                .iter()
+                .map(|line| line.text())
+                .collect::<Vec<_>>()
+                .join("\n")
+        })
+    }
+
     pub(crate) fn new(
         font_system: &mut glyphon::FontSystem,
         text: &str,

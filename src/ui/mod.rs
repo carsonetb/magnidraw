@@ -11,6 +11,7 @@ mod margin;
 mod rect;
 mod separator;
 mod stack;
+mod textinput;
 mod theme;
 
 pub use button::*;
@@ -20,6 +21,7 @@ pub use margin::*;
 pub use rect::*;
 pub use separator::*;
 pub use stack::*;
+pub use textinput::*;
 pub use theme::*;
 
 static ID_COUNTER: AtomicU32 = AtomicU32::new(0);

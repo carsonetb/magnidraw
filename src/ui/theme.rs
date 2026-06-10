@@ -2,7 +2,7 @@ use std::{any::Any, collections::HashMap};
 
 use crate::{
     Color,
-    ui::{LabelParams, SeparatorParams, UIButtonParams},
+    ui::{LabelParams, SeparatorParams, TextInputParams, UIButtonParams},
 };
 
 /// A color theme to be used by UI nodes.
@@ -12,6 +12,7 @@ pub struct Theme {
     pub buttons: UIButtonParams,
     pub separators: SeparatorParams,
     pub labels: LabelParams,
+    pub text_inputs: TextInputParams,
     /// Other attributes for custom UI elements.
     pub other: HashMap<String, Box<dyn Any>>,
 }
@@ -47,6 +48,17 @@ impl Theme {
                 color: nord_6,
                 selection_color: Color::rgba(nord_4.r, nord_4.g, nord_4.b, 0.2),
             },
+            text_inputs: TextInputParams {
+                color: nord_1,
+                text_color: nord_6,
+                hint_color: nord_4,
+                selection_color: Color::rgba(nord_4.r, nord_4.g, nord_4.b, 0.2),
+                cursor_color: nord_6,
+                cursor_width: 2.0,
+                radii: [10.0, 10.0, 10.0, 10.0],
+                border_width: 0.0,
+                border_color: Color::BLACK,
+            },
             other: HashMap::new(),
         }
     }
@@ -64,6 +76,7 @@ impl Theme {
         let subtext0 = Color::rgb255(108.0, 111.0, 133.0);
         let subtext1 = Color::rgb255(92.0, 95.0, 119.0);
         let text = Color::rgb255(76.0, 79.0, 105.0);
+        let rosewater = Color::rgb255(220.0, 138.0, 120.0);
 
         Self {
             font: "Sans Serif",
@@ -83,7 +96,18 @@ impl Theme {
             },
             labels: LabelParams {
                 color: text,
-                selection_color: Color::rgba(overlay2.r, overlay2.g, overlay2.b, 0.5),
+                selection_color: Color::rgba(overlay2.r, overlay2.g, overlay2.b, 0.3),
+            },
+            text_inputs: TextInputParams {
+                color: surface0,
+                text_color: text,
+                hint_color: overlay1,
+                selection_color: Color::rgba(overlay2.r, overlay2.g, overlay2.b, 0.3),
+                cursor_color: rosewater,
+                cursor_width: 2.0,
+                radii: [10.0, 10.0, 10.0, 10.0],
+                border_width: 0.0,
+                border_color: Color::BLACK,
             },
             other: HashMap::new(),
         }
