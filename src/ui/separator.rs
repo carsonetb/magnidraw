@@ -219,7 +219,7 @@ impl Element for Separator {
         out
     }
 
-    fn children(&mut self) -> Vec<&Box<dyn Element>> {
+    fn children(&self) -> Vec<&Box<dyn Element>> {
         let mut out = Vec::new();
 
         if let Some(first) = &self.first {
@@ -227,6 +227,20 @@ impl Element for Separator {
         }
 
         if let Some(second) = &self.second {
+            out.push(second);
+        }
+
+        out
+    }
+
+    fn children_mut(&mut self) -> Vec<&mut Box<dyn Element>> {
+        let mut out = Vec::new();
+
+        if let Some(first) = &mut self.first {
+            out.push(first);
+        }
+
+        if let Some(second) = &mut self.second {
             out.push(second);
         }
 
@@ -259,5 +273,9 @@ impl Element for Separator {
 
     fn id(&self) -> u32 {
         self.id
+    }
+
+    fn as_any(&mut self) -> &mut dyn std::any::Any {
+        self
     }
 }

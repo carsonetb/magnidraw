@@ -1,7 +1,4 @@
-use std::{
-    cell::RefCell,
-    ops::{Deref, DerefMut},
-};
+use std::{any::Any, cell::RefCell, ops::DerefMut};
 
 use glyphon::{
     Action, Edit,
@@ -11,26 +8,35 @@ use winit::event::MouseButton;
 
 use crate::{
     Button, Color, Cursor, KeyboardButton, Rect, Size, Text,
-    ui::{Element, Message, get_id},
+    ui::{Element, Message, MessageContent, get_id},
 };
 
+/// Params for a [`TextInput`].
 #[derive(Debug, Clone, Copy)]
 pub struct TextInputParams {
+    /// Text box background color.
     pub color: Color,
     pub text_color: Color,
+    /// Color of hint text if present.
     pub hint_color: Color,
+    /// Color of the highlight when the user drags the mouse.
     pub selection_color: Color,
     pub cursor_color: Color,
     pub cursor_width: f32,
+    /// Text box border radii.
     pub radii: [f32; 4],
+    /// Text box border width.
     pub border_width: f32,
+    /// Text box border color.
     pub border_color: Color,
 }
 
+/// A box in which the user can type text.
 #[derive(Clone)]
 pub struct TextInput {
     pub params: TextInputParams,
     pub text: Text,
+    /// The hint is displayed when `text` is empty.
     pub hint: Option<Text>,
     selecting: bool,
     highlighted: bool,
@@ -245,10 +251,23 @@ impl Element for TextInput {
             self.text.editor.set_selection(Selection::None);
         }
 
+        let mut out = Vec::new();
+
+        if input.button_just_pressed(Button::Keyboard(KeyboardButton::Enter)) {
+            out.push(Message::new(
+                self,
+                MessageContent::TextInputSubmit(self.text.text.clone()),
+            ));
+        }
+
+        out
+    }
+
+    fn children(&self) -> Vec<&Box<dyn Element>> {
         Vec::new()
     }
 
-    fn children(&mut self) -> Vec<&Box<dyn Element>> {
+    fn children_mut(&mut self) -> Vec<&mut Box<dyn Element>> {
         Vec::new()
     }
 
@@ -258,5 +277,9 @@ impl Element for TextInput {
 
     fn id(&self) -> u32 {
         self.id
+    }
+
+    fn as_any(&mut self) -> &mut dyn Any {
+        self
     }
 }

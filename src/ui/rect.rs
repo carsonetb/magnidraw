@@ -55,11 +55,19 @@ impl Element for UIRect {
         self.id
     }
 
-    fn children(&mut self) -> Vec<&Box<dyn Element>> {
+    fn children(&self) -> Vec<&Box<dyn Element>> {
+        Vec::new()
+    }
+
+    fn children_mut(&mut self) -> Vec<&mut Box<dyn Element>> {
         Vec::new()
     }
 
     fn min_size(&self) -> Size {
         Size::new(0.0, 0.0)
+    }
+
+    fn as_any(&mut self) -> &mut dyn std::any::Any {
+        self
     }
 }

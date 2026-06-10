@@ -189,7 +189,11 @@ impl Element for Label {
         Vec::new()
     }
 
-    fn children(&mut self) -> Vec<&Box<dyn Element>> {
+    fn children(&self) -> Vec<&Box<dyn Element>> {
+        Vec::new()
+    }
+
+    fn children_mut(&mut self) -> Vec<&mut Box<dyn Element>> {
         Vec::new()
     }
 
@@ -199,5 +203,9 @@ impl Element for Label {
 
     fn id(&self) -> u32 {
         self.id
+    }
+
+    fn as_any(&mut self) -> &mut dyn std::any::Any {
+        self
     }
 }

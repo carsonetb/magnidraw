@@ -1,5 +1,6 @@
 use std::{
     any::Any,
+    collections::HashSet,
     sync::atomic::{AtomicU32, Ordering},
 };
 
@@ -88,7 +89,9 @@ pub trait Element: DynClone {
 
     /// All the children of this Element. An Element may have any number of
     /// children.
-    fn children(&mut self) -> Vec<&Box<dyn Element>>;
+    fn children(&self) -> Vec<&Box<dyn Element>>;
+
+    fn children_mut(&mut self) -> Vec<&mut Box<dyn Element>>;
 
     /// Minimum size of this Element. The minimum size of children should be
     /// taken into account if they are present.
@@ -97,9 +100,69 @@ pub trait Element: DynClone {
     /// ID of this element, for sending [`Message`]s. You can use the [`get_id`]
     /// function to easily make one.
     fn id(&self) -> u32;
+
+    fn as_any(&mut self) -> &mut dyn Any;
+
+    fn child_ids(&self) -> HashSet<u32> {
+        let mut out = HashSet::new();
+
+        for child in self.children() {
+            out.insert(child.id());
+            out.extend(child.child_ids().iter());
+        }
+
+        out
+    }
+
+    /// Find a child by ID, immutably.
+    /// TODO: This function is very inefficient, should cache the structure.
+    fn find_child(&self, id: u32) -> Option<&Box<dyn Element>> {
+        let mut out = None;
+
+        for child in self.children() {
+            if child.id() == id {
+                out = Some(child);
+                break;
+            }
+
+            if child.child_ids().contains(&id) {
+                return child.find_child(id);
+            }
+        }
+
+        out
+    }
+
+    fn find_child_mut(&mut self, id: u32) -> Option<&mut Box<dyn Element>> {
+        let mut out = None;
+
+        for child in self.children_mut() {
+            if child.id() == id {
+                out = Some(child);
+                break;
+            }
+
+            if child.child_ids().contains(&id) {
+                return child.find_child_mut(id);
+            }
+        }
+
+        out
+    }
 }
 
 clone_trait_object!(Element);
+
+pub fn element_child<T: Element + 'static>(
+    element: &mut Box<dyn Element>,
+    id: u32,
+) -> Option<&mut T> {
+    element
+        .find_child_mut(id)
+        .unwrap()
+        .as_any()
+        .downcast_mut::<T>()
+}
 
 /// A Message which is passed up from an [`Element`] to be processed by the
 /// [`crate::Game`].
@@ -123,7 +186,12 @@ impl Message {
 /// Alternatively, you may store data in the [`Element`] itself, and query it
 /// later directly.
 pub enum MessageContent {
+    /// A Button is pressed.
     ButtonPress,
+    /// A Button is released.
+    ButtonRelease,
+    /// Enter was pressed on a TextInput.
+    TextInputSubmit(String),
     Other(Box<dyn Any>),
 }
 

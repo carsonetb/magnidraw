@@ -2,7 +2,7 @@ use magnidraw::{
     Color, Engine, EngineState, Game, Input, Pos, Rect, TextAlign,
     ui::{
         Container, Direction, Element, Label, Margin, Message, MessageContent, Separator, Stack,
-        StackItemMode, StackMode, TextInput, Theme, UIButton, UIRect,
+        StackItemMode, StackMode, TextInput, Theme, UIButton, UIRect, element_child,
     },
 };
 
@@ -11,11 +11,17 @@ use magnidraw::{
 pub struct UIDemo {
     // Container is optional because we need to set it up in the setup function.
     container: Option<Container>,
+    input_id: u32,
+    text_id: u32,
 }
 
 impl UIDemo {
     fn new() -> Self {
-        Self { container: None }
+        Self {
+            container: None,
+            input_id: 0,
+            text_id: 0,
+        }
     }
 }
 
@@ -43,14 +49,13 @@ impl Game for UIDemo {
         for _ in 0..10 {
             stack.push((button_margin.clone(), StackItemMode::Compress));
         }
-        stack.push((
-            Box::new(TextInput::new(
-                engine.load_text("Hello!", 32.0, Some(theme.font), TextAlign::Left, None),
-                theme.text_inputs,
-                Some(engine.load_text("Something", 32.0, Some(theme.font), TextAlign::Left, None)),
-            )),
-            StackItemMode::Compress,
+        let input = Box::new(TextInput::new(
+            engine.load_text("Hello!", 32.0, Some(theme.font), TextAlign::Left, None),
+            theme.text_inputs,
+            Some(engine.load_text("Something", 32.0, Some(theme.font), TextAlign::Left, None)),
         ));
+        self.input_id = input.id();
+        stack.push((input, StackItemMode::Compress));
         let stack = Box::new(Stack::new(Direction::Vertical, StackMode::Delegate, stack));
 
         let label = Box::new(Label::new(
@@ -62,6 +67,7 @@ impl Game for UIDemo {
             TextAlign::Right,
             theme.labels,
         ));
+        self.text_id = label.id();
 
         let bottom = Box::new(Separator::new(
             theme.separators,
@@ -101,9 +107,13 @@ impl Game for UIDemo {
         // Process all the messages to check if the button was pressed.
         let container = self.container.as_mut().unwrap();
         for message in messages {
-            if message.from == container.element.children()[0].id() {
+            if message.from == self.input_id {
                 match message.content {
-                    MessageContent::ButtonPress => container.rect.pos.x += 50.0,
+                    MessageContent::TextInputSubmit(text) => {
+                        let input =
+                            element_child::<Label>(&mut container.element, self.text_id).unwrap();
+                        input.text.text = input.text.text.clone() + &text;
+                    }
                     _ => (),
                 }
             }

@@ -74,8 +74,12 @@ impl Element for Margin {
         self.contains.update(engine, state, input)
     }
 
-    fn children(&mut self) -> Vec<&Box<dyn Element>> {
+    fn children(&self) -> Vec<&Box<dyn Element>> {
         vec![&self.contains]
+    }
+
+    fn children_mut(&mut self) -> Vec<&mut Box<dyn Element>> {
+        vec![&mut self.contains]
     }
 
     fn min_size(&self) -> Size {
@@ -88,5 +92,9 @@ impl Element for Margin {
 
     fn id(&self) -> u32 {
         self.id
+    }
+
+    fn as_any(&mut self) -> &mut dyn std::any::Any {
+        self
     }
 }

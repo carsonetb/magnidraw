@@ -161,8 +161,15 @@ impl Element for Stack {
         messages
     }
 
-    fn children(&mut self) -> Vec<&Box<dyn Element>> {
+    fn children(&self) -> Vec<&Box<dyn Element>> {
         self.elements.iter().map(|(element, _)| element).collect()
+    }
+
+    fn children_mut(&mut self) -> Vec<&mut Box<dyn Element>> {
+        self.elements
+            .iter_mut()
+            .map(|(element, _)| element)
+            .collect()
     }
 
     fn min_size(&self) -> crate::Size {
@@ -191,5 +198,9 @@ impl Element for Stack {
 
     fn id(&self) -> u32 {
         self.id
+    }
+
+    fn as_any(&mut self) -> &mut dyn std::any::Any {
+        self
     }
 }
