@@ -48,8 +48,8 @@ impl<'a> Drawer<'a> {
         let mut data = bytemuck::cast_slice(&[
             pos.x,
             pos.y,
-            sprite.width * scale.x,
-            sprite.height * scale.y,
+            sprite.size.w * scale.x,
+            sprite.size.h * scale.y,
             color.r,
             color.g,
             color.b,

@@ -1,8 +1,8 @@
 use std::{any::Any, collections::HashMap};
 
 use crate::{
-    Color,
-    ui::{LabelParams, SeparatorParams, TextInputParams, UIButtonParams},
+    Color, Engine, EngineState, Scale,
+    ui::{LabelParams, SeparatorParams, TextInputParams, ToggleParams, UIButtonParams},
 };
 
 /// A color theme to be used by UI nodes.
@@ -13,12 +13,13 @@ pub struct Theme {
     pub separators: SeparatorParams,
     pub labels: LabelParams,
     pub text_inputs: TextInputParams,
+    pub toggles: ToggleParams,
     /// Other attributes for custom UI elements.
     pub other: HashMap<String, Box<dyn Any>>,
 }
 
 impl Theme {
-    pub fn nord() -> Self {
+    pub fn nord(engine: &mut Engine, state: &mut EngineState) -> Self {
         let nord_0 = Color::rgb255(46.0, 52.0, 64.0);
         let nord_1 = Color::rgb255(59.0, 66.0, 82.0);
         let nord_2 = Color::rgb255(67.0, 76.0, 94.0);
@@ -59,11 +60,26 @@ impl Theme {
                 border_width: 0.0,
                 border_color: Color::BLACK,
             },
+            toggles: ToggleParams {
+                text_color: nord_6,
+                toggle_on_color: nord_6,
+                toggle_off_color: nord_6,
+                toggle_on: engine.load_svg(
+                    state,
+                    include_bytes!("icons/toggle-right.svg"),
+                    Scale::new(2.0, 2.0),
+                ),
+                toggle_off: engine.load_svg(
+                    state,
+                    include_bytes!("icons/toggle-left.svg"),
+                    Scale::new(2.0, 2.0),
+                ),
+            },
             other: HashMap::new(),
         }
     }
 
-    pub fn catppuccin_latte() -> Self {
+    pub fn catppuccin_latte(engine: &mut Engine, state: &mut EngineState) -> Self {
         let crust = Color::rgb255(220.0, 224.0, 232.0);
         let mantle = Color::rgb255(230.0, 233.0, 239.0);
         let base = Color::rgb255(239.0, 241.0, 245.0);
@@ -76,6 +92,8 @@ impl Theme {
         let subtext0 = Color::rgb255(108.0, 111.0, 133.0);
         let subtext1 = Color::rgb255(92.0, 95.0, 119.0);
         let text = Color::rgb255(76.0, 79.0, 105.0);
+        let green = Color::rgb255(64.0, 160.0, 43.0);
+        let red = Color::rgb255(210.0, 15.0, 57.0);
         let rosewater = Color::rgb255(220.0, 138.0, 120.0);
 
         Self {
@@ -108,6 +126,21 @@ impl Theme {
                 radii: [10.0, 10.0, 10.0, 10.0],
                 border_width: 0.0,
                 border_color: Color::BLACK,
+            },
+            toggles: ToggleParams {
+                text_color: text,
+                toggle_on_color: green,
+                toggle_off_color: surface2,
+                toggle_on: engine.load_svg(
+                    state,
+                    include_bytes!("icons/toggle-right.svg"),
+                    Scale::new(1.5625, 1.5625),
+                ),
+                toggle_off: engine.load_svg(
+                    state,
+                    include_bytes!("icons/toggle-left.svg"),
+                    Scale::new(1.5625, 1.5625),
+                ),
             },
             other: HashMap::new(),
         }

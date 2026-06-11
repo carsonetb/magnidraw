@@ -1,8 +1,8 @@
 use magnidraw::{
-    Color, Engine, EngineState, Game, Input, Pos, Rect, TextAlign,
+    Color, Engine, EngineState, Game, Input, Pos, Rect, Sprite, TextAlign,
     ui::{
         Container, Direction, Element, Label, Margin, Message, MessageContent, Separator, Stack,
-        StackItemMode, StackMode, TextInput, Theme, UIButton, UIRect, element_child,
+        StackItemMode, StackMode, TextInput, Theme, Toggle, UIButton, UIRect, element_child,
     },
 };
 
@@ -28,7 +28,7 @@ impl UIDemo {
 impl Game for UIDemo {
     fn setup(&mut self, engine: &mut Engine, state: &mut EngineState) {
         // Create the theme for our UI.
-        let theme = Theme::catppuccin_latte();
+        let theme = Theme::catppuccin_latte(engine, state);
         engine.apply_theme(state, &theme);
 
         // Create the button with all its parameters.
@@ -56,6 +56,14 @@ impl Game for UIDemo {
         ));
         self.input_id = input.id();
         stack.push((input, StackItemMode::Compress));
+        stack.push((
+            Box::new(Toggle::new(
+                theme.toggles,
+                engine.load_text("Hello!", 32.0, Some(theme.font), TextAlign::Left, None),
+                true,
+            )),
+            StackItemMode::Compress,
+        ));
         let stack = Box::new(Stack::new(Direction::Vertical, StackMode::Delegate, stack));
 
         let label = Box::new(Label::new(

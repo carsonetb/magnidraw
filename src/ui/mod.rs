@@ -14,6 +14,7 @@ mod separator;
 mod stack;
 mod textinput;
 mod theme;
+mod toggle;
 
 pub use button::*;
 use dyn_clone::{DynClone, clone_trait_object};
@@ -24,6 +25,7 @@ pub use separator::*;
 pub use stack::*;
 pub use textinput::*;
 pub use theme::*;
+pub use toggle::*;
 
 static ID_COUNTER: AtomicU32 = AtomicU32::new(0);
 
@@ -190,6 +192,10 @@ pub enum MessageContent {
     ButtonPress,
     /// A Button is released.
     ButtonRelease,
+    /// A Toggle is switched on.
+    ToggleOn,
+    /// A Toggle is switched off.
+    ToggleOff,
     /// Enter was pressed on a TextInput.
     TextInputSubmit(String),
     Other(Box<dyn Any>),

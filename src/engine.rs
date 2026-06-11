@@ -21,7 +21,7 @@ use winit::{
 use winit_input_helper::WinitInputHelper;
 
 use crate::{
-    AnyAxis, Color, Cursor, Drawer, Game, Input, Pos, Rect, Size, Sprite, Text, TextAlign,
+    AnyAxis, Color, Cursor, Drawer, Game, Input, Pos, Rect, Scale, Size, Sprite, Text, TextAlign,
     input::{Controller, ControllerButton},
 };
 
@@ -233,6 +233,21 @@ impl Engine {
             &mut state.state,
             &self.sprite_bind_group_layout.as_ref().unwrap(),
             bytes,
+        )
+    }
+
+    pub fn load_svg(
+        &mut self,
+        state: &mut EngineState,
+        bytes: &'static [u8],
+        scale: Scale,
+    ) -> Sprite {
+        Sprite::new_svg(
+            "Unnamed Sprite",
+            &mut state.state,
+            &self.sprite_bind_group_layout.as_ref().unwrap(),
+            bytes,
+            scale,
         )
     }
 
