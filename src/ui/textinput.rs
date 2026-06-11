@@ -7,7 +7,7 @@ use glyphon::{
 use winit::event::MouseButton;
 
 use crate::{
-    Button, Color, Cursor, KeyboardButton, Rect, Size, Text,
+    Button, Color, Cursor, KeyboardButton, Pos, Rect, Size, Text,
     ui::{Element, Message, MessageContent, get_id},
 };
 
@@ -23,6 +23,12 @@ pub struct TextInputParams {
     pub selection_color: Color,
     pub cursor_color: Color,
     pub cursor_width: f32,
+    /// Internal padding of the input, between the rectangle and the text.
+    /// Ordered left, right, top, bottom.
+    pub padding: [f32; 4],
+    /// External margin of the input, outside the rectangle. Ordered left,
+    /// right, top, bottom.
+    pub margin: [f32; 4],
     /// Text box border radii.
     pub radii: [f32; 4],
     /// Text box border width.
@@ -71,7 +77,12 @@ impl Element for TextInput {
 
         drawer.rect_ext(
             z_index,
-            rect,
+            Rect::new(
+                rect.pos.x + self.params.margin[0],
+                rect.pos.y + self.params.margin[2],
+                rect.size.w - self.params.margin[1] - self.params.margin[0],
+                rect.size.h - self.params.margin[3] - self.params.margin[2],
+            ),
             self.params.color,
             self.params.radii[0],
             self.params.radii[1],
@@ -81,22 +92,32 @@ impl Element for TextInput {
             self.params.border_color,
         );
 
+        let pos = rect.pos
+            + Pos::new(
+                self.params.margin[0] + self.params.padding[0],
+                rect.size.h / 2.0 - self.text.line_height / 2.0,
+            );
         if self.text.text.is_empty()
             && let Some(hint) = &self.hint
         {
-            drawer.text(z_index, hint, rect.pos, self.params.hint_color);
+            drawer.text(z_index, hint, pos, self.params.hint_color);
         } else {
-            drawer.text(z_index, &self.text, rect.pos, self.params.text_color);
+            drawer.text(z_index, &self.text, pos, self.params.text_color);
         }
 
-        if let Some((x, y)) = self.text.editor.cursor_position()
-            && (rect.pos.x + x as f32) < rect.pos.x + rect.size.w
+        // Yeah idk about this but it works
+        if let Some((x, _)) = self.text.editor.cursor_position()
+            && (rect.pos.x + x as f32)
+                < rect.pos.x + rect.size.w
+                    - self.params.margin[1]
+                    - self.params.margin[0]
+                    - self.params.padding[0]
         {
             drawer.rect(
                 z_index + 1,
                 Rect::new(
-                    rect.pos.x + x as f32,
-                    rect.pos.y + y as f32 + 5.0,
+                    rect.pos.x + self.params.margin[0] + self.params.padding[0] + x as f32,
+                    rect.pos.y + rect.size.h / 2.0 - (self.text.line_height - 10.0) / 2.0,
                     self.params.cursor_width,
                     self.text.line_height - 10.0,
                 ),
@@ -128,8 +149,8 @@ impl Element for TextInput {
                         drawer.rect(
                             z_index + 1,
                             Rect::new(
-                                rect.pos.x + left,
-                                rect.pos.y + run.line_top,
+                                rect.pos.x + left + self.params.margin[0] + self.params.padding[0],
+                                rect.pos.y + rect.size.h / 2.0 - self.text.line_height / 2.0,
                                 right - left,
                                 run.line_height,
                             ),
@@ -148,30 +169,30 @@ impl Element for TextInput {
         input: &crate::Input,
     ) -> Vec<Message> {
         let rect = **&self.rect.borrow();
-        self.text.set_clip(rect);
+
+        let clip = Rect::new(
+            rect.pos.x + self.params.margin[0],
+            rect.pos.y + self.params.margin[2],
+            rect.size.w - self.params.margin[0] - self.params.margin[1],
+            rect.size.h - self.params.margin[2] - self.params.margin[3],
+        );
+        self.text.set_clip(clip);
 
         if let Some(pos) = input.mouse_pos()
             && pos.inside(rect)
         {
             let mut inside = false;
-            if let Some(line) = self.text.inner_buffer().layout_runs().next()
-                && pos.inside(Rect::new(
-                    rect.pos.x,
-                    rect.pos.y + line.line_top,
-                    line.line_w,
-                    line.line_height,
-                ))
-            {
+            if pos.inside(clip) {
                 inside = true;
                 state.set_cursor(Cursor::Text);
             } else {
                 state.set_cursor(Cursor::Default);
             }
 
-            let hit = self
-                .text
-                .inner_buffer()
-                .hit(pos.x - rect.pos.x, pos.y - rect.pos.y);
+            let hit = self.text.inner_buffer().hit(
+                pos.x - rect.pos.x - self.params.margin[0] - self.params.padding[0],
+                pos.y - rect.pos.y - self.params.margin[1] - self.params.padding[0],
+            );
 
             if inside {
                 if input.button_just_pressed(Button::Mouse(MouseButton::Left))
@@ -272,7 +293,17 @@ impl Element for TextInput {
     }
 
     fn min_size(&self) -> Size {
-        Size::new(40.0, self.text.size().h)
+        Size::new(
+            self.params.margin[0]
+                + self.params.margin[1]
+                + self.params.padding[0]
+                + self.params.padding[1],
+            self.params.margin[2]
+                + self.text.size().h
+                + self.params.margin[3]
+                + self.params.padding[2]
+                + self.params.padding[3],
+        )
     }
 
     fn id(&self) -> u32 {

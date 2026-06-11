@@ -6,6 +6,9 @@ use crate::{
 };
 
 /// A margin container, giving the element it contains gaps around the sides.
+///
+/// For [`crate::ui::UIButton`], [`crate::ui::Radio`], [`crate::ui::TextInput`],
+/// and [`crate::ui::Toggle`] this use case is already covered internally.
 #[derive(Clone)]
 pub struct Margin {
     pub left: f32,

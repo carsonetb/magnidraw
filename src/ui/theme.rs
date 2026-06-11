@@ -61,6 +61,8 @@ impl Theme {
                 selection_color: Color::rgba(nord_4.r, nord_4.g, nord_4.b, 0.2),
                 cursor_color: nord_6,
                 cursor_width: 2.0,
+                margin: [7.0, 7.0, 7.0, 7.0],
+                padding: [5.0, 5.0, 5.0, 5.0],
                 radii: [10.0, 10.0, 10.0, 10.0],
                 border_width: 0.0,
                 border_color: Color::BLACK,
@@ -105,19 +107,19 @@ impl Theme {
 
     pub fn catppuccin_latte(engine: &mut Engine, state: &mut EngineState) -> Self {
         let crust = Color::rgb255(220.0, 224.0, 232.0);
-        let mantle = Color::rgb255(230.0, 233.0, 239.0);
+        let _mantle = Color::rgb255(230.0, 233.0, 239.0);
         let base = Color::rgb255(239.0, 241.0, 245.0);
         let surface0 = Color::rgb255(204.0, 208.0, 218.0);
         let surface1 = Color::rgb255(188.0, 192.0, 204.0);
         let surface2 = Color::rgb255(172.0, 176.0, 190.0);
-        let overlay0 = Color::rgb255(156.0, 160.0, 176.0);
+        let _overlay0 = Color::rgb255(156.0, 160.0, 176.0);
         let overlay1 = Color::rgb255(140.0, 143.0, 161.0);
         let overlay2 = Color::rgb255(124.0, 127.0, 147.0);
-        let subtext0 = Color::rgb255(108.0, 111.0, 133.0);
-        let subtext1 = Color::rgb255(92.0, 95.0, 119.0);
+        let _subtext0 = Color::rgb255(108.0, 111.0, 133.0);
+        let _subtext1 = Color::rgb255(92.0, 95.0, 119.0);
         let text = Color::rgb255(76.0, 79.0, 105.0);
         let green = Color::rgb255(64.0, 160.0, 43.0);
-        let red = Color::rgb255(210.0, 15.0, 57.0);
+        let _red = Color::rgb255(210.0, 15.0, 57.0);
         let rosewater = Color::rgb255(220.0, 138.0, 120.0);
 
         engine.load_font(include_bytes!("fonts/opensans/OpenSans-Regular.ttf"));
@@ -151,6 +153,8 @@ impl Theme {
                 selection_color: Color::rgba(overlay2.r, overlay2.g, overlay2.b, 0.3),
                 cursor_color: rosewater,
                 cursor_width: 2.0,
+                margin: [7.0, 7.0, 7.0, 7.0],
+                padding: [10.0, 10.0, 5.0, 5.0],
                 radii: [10.0, 10.0, 10.0, 10.0],
                 border_width: 0.0,
                 border_color: Color::BLACK,

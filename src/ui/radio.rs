@@ -15,7 +15,7 @@ pub struct RadioParams {
     pub off_color: Color,
     pub on_sprite: Sprite,
     pub off_sprite: Sprite,
-    /// External margin of the toggle, outside the rectangle. Ordered left,
+    /// External margin of the element, outside the rectangle. Ordered left,
     /// right, top, bottom.
     pub margin: [f32; 4],
     /// Space between the toggle icon and the text.
@@ -49,8 +49,8 @@ impl Radio {
 impl Element for Radio {
     fn render<'frame, 'app: 'frame>(
         &'app self,
-        engine: &mut crate::Engine,
-        state: &mut crate::EngineState,
+        _engine: &mut crate::Engine,
+        _state: &mut crate::EngineState,
         drawer: &mut crate::Drawer<'frame>,
         z_index: i32,
         rect: Rect,
@@ -73,7 +73,7 @@ impl Element for Radio {
                 &sprite,
                 Pos::new(
                     rect.pos.x + self.params.margin[0],
-                    rect.pos.y + self.params.margin[0] + height,
+                    rect.pos.y + self.params.margin[2] + height,
                 ),
                 Scale::ONE,
                 color,
@@ -98,7 +98,7 @@ impl Element for Radio {
 
     fn update(
         &mut self,
-        engine: &mut crate::Engine,
+        _engine: &mut crate::Engine,
         state: &mut crate::EngineState,
         input: &crate::Input,
     ) -> Vec<super::Message> {

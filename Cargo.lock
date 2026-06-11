@@ -1434,7 +1434,8 @@ dependencies = [
 [[package]]
 name = "keydraw"
 version = "0.1.0"
-source = "git+https://github.com/carsonetb/keydraw?branch=trunk#5de3c2e620b69e38a9e291f537ca2884e231fd8c"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "315812dd885d1f505d7eb56f904b8706266921760452d54d0243d233a7d6f8bd"
 dependencies = [
  "anyhow",
  "bytemuck",

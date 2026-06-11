@@ -1,8 +1,8 @@
 use magnidraw::{
-    Color, Engine, EngineState, Game, Input, Pos, Rect, Sprite, TextAlign,
+    Color, Engine, EngineState, Game, Input, Pos, Rect, TextAlign,
     ui::{
-        Container, Direction, Element, Label, Margin, Message, MessageContent, Radio, Separator,
-        Stack, StackItemMode, StackMode, TextInput, Theme, Toggle, UIButton, UIRect, element_child,
+        Container, Direction, Element, Label, Message, MessageContent, Radio, Separator, Stack,
+        StackItemMode, StackMode, TextInput, Theme, Toggle, UIButton, UIRect, element_child,
     },
 };
 
@@ -67,8 +67,8 @@ impl Game for UIDemo {
             Box::new(Radio::new(
                 theme.radios,
                 vec![
-                    engine.load_text("Toggle me!", 28.0, Some(theme.font), TextAlign::Left, None),
-                    engine.load_text("Toggle me!", 28.0, Some(theme.font), TextAlign::Left, None),
+                    engine.load_text("Radio me?", 28.0, Some(theme.font), TextAlign::Left, None),
+                    engine.load_text("Or me ...", 28.0, Some(theme.font), TextAlign::Left, None),
                 ],
                 1,
             )),
@@ -115,7 +115,7 @@ impl Game for UIDemo {
         ));
     }
 
-    fn update(&mut self, _engine: &mut Engine, state: &mut EngineState, input: &Input) {
+    fn update(&mut self, _engine: &mut Engine, state: &mut EngineState, _input: &Input) {
         self.container.as_mut().unwrap().rect =
             Rect::new_basic(Pos::new(0.0, 0.0), state.window_size());
         state.set_window_min_size(self.container.as_ref().unwrap().element.min_size());
