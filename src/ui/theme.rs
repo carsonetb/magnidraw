@@ -2,7 +2,9 @@ use std::{any::Any, collections::HashMap};
 
 use crate::{
     Color, Engine, EngineState, Scale,
-    ui::{LabelParams, SeparatorParams, TextInputParams, ToggleParams, UIButtonParams},
+    ui::{
+        LabelParams, RadioParams, SeparatorParams, TextInputParams, ToggleParams, UIButtonParams,
+    },
 };
 
 /// A color theme to be used by UI nodes.
@@ -14,6 +16,7 @@ pub struct Theme {
     pub labels: LabelParams,
     pub text_inputs: TextInputParams,
     pub toggles: ToggleParams,
+    pub radios: RadioParams,
     /// Other attributes for custom UI elements.
     pub other: HashMap<String, Box<dyn Any>>,
 }
@@ -74,6 +77,23 @@ impl Theme {
                 toggle_off: engine.load_svg(
                     state,
                     include_bytes!("icons/toggle-left.svg"),
+                    Scale::new(2.0, 2.0),
+                ),
+                margin: [7.0, 7.0, 7.0, 7.0],
+                icon_text_padding: 7.0,
+            },
+            radios: RadioParams {
+                text_color: nord_6,
+                on_color: nord_6,
+                off_color: nord_6,
+                on_sprite: engine.load_svg(
+                    state,
+                    include_bytes!("icons/radio-button-fill.svg"),
+                    Scale::new(2.0, 2.0),
+                ),
+                off_sprite: engine.load_svg(
+                    state,
+                    include_bytes!("icons/radio-button-light.svg"),
                     Scale::new(2.0, 2.0),
                 ),
                 margin: [7.0, 7.0, 7.0, 7.0],
@@ -150,6 +170,23 @@ impl Theme {
                     Scale::new(1.3, 1.3),
                 ),
                 margin: [7.0, 7.0, -2.0, -2.0],
+                icon_text_padding: 7.0,
+            },
+            radios: RadioParams {
+                text_color: text,
+                on_color: green,
+                off_color: surface2,
+                on_sprite: engine.load_svg(
+                    state,
+                    include_bytes!("icons/radio-button-fill.svg"),
+                    Scale::new(1.3, 1.3),
+                ),
+                off_sprite: engine.load_svg(
+                    state,
+                    include_bytes!("icons/radio-button-light.svg"),
+                    Scale::new(1.3, 1.3),
+                ),
+                margin: [7.0, 7.0, 7.0, 7.0],
                 icon_text_padding: 7.0,
             },
             other: HashMap::new(),

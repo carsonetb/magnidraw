@@ -1,8 +1,8 @@
 use magnidraw::{
     Color, Engine, EngineState, Game, Input, Pos, Rect, Sprite, TextAlign,
     ui::{
-        Container, Direction, Element, Label, Margin, Message, MessageContent, Separator, Stack,
-        StackItemMode, StackMode, TextInput, Theme, Toggle, UIButton, UIRect, element_child,
+        Container, Direction, Element, Label, Margin, Message, MessageContent, Radio, Separator,
+        Stack, StackItemMode, StackMode, TextInput, Theme, Toggle, UIButton, UIRect, element_child,
     },
 };
 
@@ -44,7 +44,7 @@ impl Game for UIDemo {
         let rect = Box::new(UIRect::new(Color::BLACK));
 
         let mut stack: Vec<(Box<dyn Element>, StackItemMode)> = vec![(rect, StackItemMode::Expand)];
-        for _ in 0..10 {
+        for _ in 0..3 {
             stack.push((button.clone(), StackItemMode::Compress));
         }
         let input = Box::new(TextInput::new(
@@ -60,6 +60,17 @@ impl Game for UIDemo {
                 engine.load_text("Toggle me!", 28.0, Some(theme.font), TextAlign::Left, None),
                 true,
                 true,
+            )),
+            StackItemMode::Compress,
+        ));
+        stack.push((
+            Box::new(Radio::new(
+                theme.radios,
+                vec![
+                    engine.load_text("Toggle me!", 28.0, Some(theme.font), TextAlign::Left, None),
+                    engine.load_text("Toggle me!", 28.0, Some(theme.font), TextAlign::Left, None),
+                ],
+                1,
             )),
             StackItemMode::Compress,
         ));
@@ -104,7 +115,7 @@ impl Game for UIDemo {
         ));
     }
 
-    fn update(&mut self, _engine: &mut Engine, state: &mut EngineState, _input: &Input) {
+    fn update(&mut self, _engine: &mut Engine, state: &mut EngineState, input: &Input) {
         self.container.as_mut().unwrap().rect =
             Rect::new_basic(Pos::new(0.0, 0.0), state.window_size());
         state.set_window_min_size(self.container.as_ref().unwrap().element.min_size());

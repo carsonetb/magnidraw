@@ -9,6 +9,7 @@ use crate::{Drawer, Engine, EngineState, Input, Rect, Size};
 mod button;
 mod label;
 mod margin;
+mod radio;
 mod rect;
 mod separator;
 mod stack;
@@ -20,6 +21,7 @@ pub use button::*;
 use dyn_clone::{DynClone, clone_trait_object};
 pub use label::*;
 pub use margin::*;
+pub use radio::*;
 pub use rect::*;
 pub use separator::*;
 pub use stack::*;
@@ -188,15 +190,17 @@ impl Message {
 /// Alternatively, you may store data in the [`Element`] itself, and query it
 /// later directly.
 pub enum MessageContent {
-    /// A Button is pressed.
+    /// A [`UIButton`] is pressed.
     ButtonPress,
-    /// A Button is released.
+    /// A [`UIButton`] is released.
     ButtonRelease,
-    /// A Toggle is switched on.
+    /// A [`Toggle`] is switched on.
     ToggleOn,
-    /// A Toggle is switched off.
+    /// A [`Toggle`] is switched off.
     ToggleOff,
-    /// Enter was pressed on a TextInput.
+    /// One of the entries of a [`Radio`] button was selected.
+    RadioSelected(usize),
+    /// Enter was pressed on a [`TextInput`].
     TextInputSubmit(String),
     Other(Box<dyn Any>),
 }
