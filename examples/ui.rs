@@ -41,13 +41,11 @@ impl Game for UIDemo {
         );
         let button = Box::new(UIButton::with_theme(&theme, Some(text)));
 
-        let button_margin = Box::new(Margin::new(button, 7.0, 7.0, 7.0, 7.0));
-
         let rect = Box::new(UIRect::new(Color::BLACK));
 
         let mut stack: Vec<(Box<dyn Element>, StackItemMode)> = vec![(rect, StackItemMode::Expand)];
         for _ in 0..10 {
-            stack.push((button_margin.clone(), StackItemMode::Compress));
+            stack.push((button.clone(), StackItemMode::Compress));
         }
         let input = Box::new(TextInput::new(
             engine.load_text("Hello!", 32.0, Some(theme.font), TextAlign::Left, None),
@@ -59,7 +57,8 @@ impl Game for UIDemo {
         stack.push((
             Box::new(Toggle::new(
                 theme.toggles,
-                engine.load_text("Hello!", 32.0, Some(theme.font), TextAlign::Left, None),
+                engine.load_text("Toggle me!", 28.0, Some(theme.font), TextAlign::Left, None),
+                true,
                 true,
             )),
             StackItemMode::Compress,
@@ -91,7 +90,7 @@ impl Game for UIDemo {
             Direction::Vertical,
             0.8,
             Some(bottom),
-            Some(button_margin),
+            Some(button),
             true,
         ));
 

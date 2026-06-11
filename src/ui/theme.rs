@@ -37,6 +37,8 @@ impl Theme {
                 color: nord_1,
                 hover_color: nord_2,
                 press_color: nord_1,
+                padding: [10.0, 10.0, 10.0, 10.0],
+                margin: [7.0, 7.0, 7.0, 7.0],
                 radii: [10.0, 10.0, 10.0, 10.0],
                 border_width: 0.0,
                 border_color: Color::BLACK,
@@ -74,6 +76,8 @@ impl Theme {
                     include_bytes!("icons/toggle-left.svg"),
                     Scale::new(2.0, 2.0),
                 ),
+                margin: [7.0, 7.0, 7.0, 7.0],
+                icon_text_padding: 7.0,
             },
             other: HashMap::new(),
         }
@@ -96,14 +100,18 @@ impl Theme {
         let red = Color::rgb255(210.0, 15.0, 57.0);
         let rosewater = Color::rgb255(220.0, 138.0, 120.0);
 
+        engine.load_font(include_bytes!("fonts/opensans/OpenSans-Regular.ttf"));
+
         Self {
-            font: "Sans Serif",
+            font: "Open Sans",
             clear_color: base,
             buttons: UIButtonParams {
                 text_color: text,
                 color: surface0,
                 hover_color: surface1,
                 press_color: surface2,
+                padding: [7.0, 7.0, 7.0, 7.0],
+                margin: [7.0, 7.0, 7.0, 7.0],
                 radii: [10.0, 10.0, 10.0, 10.0],
                 border_width: 0.0,
                 border_color: Color::BLACK,
@@ -134,13 +142,15 @@ impl Theme {
                 toggle_on: engine.load_svg(
                     state,
                     include_bytes!("icons/toggle-right.svg"),
-                    Scale::new(1.5625, 1.5625),
+                    Scale::new(1.3, 1.3),
                 ),
                 toggle_off: engine.load_svg(
                     state,
                     include_bytes!("icons/toggle-left.svg"),
-                    Scale::new(1.5625, 1.5625),
+                    Scale::new(1.3, 1.3),
                 ),
+                margin: [7.0, 7.0, -2.0, -2.0],
+                icon_text_padding: 7.0,
             },
             other: HashMap::new(),
         }

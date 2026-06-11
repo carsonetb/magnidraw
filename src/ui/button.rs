@@ -16,7 +16,13 @@ pub struct UIButtonParams {
     pub hover_color: Color,
     /// Color of the button when the mouse is pressing the it.
     pub press_color: Color,
-    /// Border radii.
+    /// Internal padding of the button, separating the edge of the button from
+    /// the text. Ordered left, right, top, bottom.
+    pub padding: [f32; 4],
+    /// External margin of the button, outside the rectangle. Ordered left,
+    /// right, top, bottom.
+    pub margin: [f32; 4],
+    /// Border radii. Ordered top left, top right, bottom left, bottom right.
     pub radii: [f32; 4],
     pub border_width: f32,
     pub border_color: Color,
@@ -71,7 +77,12 @@ impl Element for UIButton {
         };
         drawer.rect_ext(
             z_index,
-            rect,
+            Rect::new(
+                rect.pos.x + self.params.margin[0],
+                rect.pos.y + self.params.margin[2],
+                rect.size.w - self.params.margin[1] * 2.0,
+                rect.size.h - self.params.margin[3] * 2.0,
+            ),
             color,
             self.params.radii[0],
             self.params.radii[1],
@@ -141,10 +152,32 @@ impl Element for UIButton {
 
     fn min_size(&self) -> crate::Size {
         match &self.text {
-            Some(text) => text.size(),
+            Some(text) => {
+                text.size()
+                    + Size::new(
+                        self.params.padding[0]
+                            + self.params.padding[1]
+                            + self.params.margin[0]
+                            + self.params.margin[1],
+                        self.params.padding[2]
+                            + self.params.padding[3]
+                            + self.params.margin[2]
+                            + self.params.margin[3],
+                    )
+            }
             None => Size::new(
-                self.params.radii[0] + self.params.radii[1],
-                self.params.radii[2] + self.params.radii[3],
+                self.params.radii[0]
+                    + self.params.radii[1]
+                    + self.params.padding[0]
+                    + self.params.padding[1]
+                    + self.params.margin[0]
+                    + self.params.margin[1],
+                self.params.radii[2]
+                    + self.params.radii[3]
+                    + self.params.padding[2]
+                    + self.params.padding[3]
+                    + self.params.margin[2]
+                    + self.params.margin[3],
             ),
         }
     }
