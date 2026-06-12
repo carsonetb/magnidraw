@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use winit::event::MouseButton;
 
 use crate::{
-    Button, Color, Cursor, Drawer, Engine, EngineState, Input, Rect, Size,
+    Button, Color, Cursor, Drawer, Engine, Input, Rect, Size,
     ui::{Direction, Element, Message, get_id},
 };
 
@@ -57,20 +57,19 @@ impl Separator {
 }
 
 impl Element for Separator {
-    fn setup(&mut self, engine: &mut Engine, state: &mut EngineState) {
+    fn setup(&mut self, engine: &mut Engine) {
         if let Some(first) = &mut self.first {
-            first.setup(engine, state);
+            first.setup(engine);
         }
 
         if let Some(second) = &mut self.second {
-            second.setup(engine, state);
+            second.setup(engine);
         }
     }
 
     fn render<'frame, 'app: 'frame>(
         &'app self,
         engine: &mut Engine,
-        state: &mut EngineState,
         drawer: &mut Drawer<'frame>,
         z_index: i32,
         rect: Rect,
@@ -106,13 +105,13 @@ impl Element for Separator {
         };
 
         match &self.first {
-            Some(element) => element.render(engine, state, drawer, z_index, first_rect),
+            Some(element) => element.render(engine, drawer, z_index, first_rect),
             None => (),
         }
 
         match &self.second {
             Some(element) => {
-                element.render(engine, state, drawer, z_index, second_rect);
+                element.render(engine, drawer, z_index, second_rect);
             }
             None => (),
         }
@@ -122,20 +121,15 @@ impl Element for Separator {
         self.rect.replace(rect);
     }
 
-    fn update(
-        &mut self,
-        engine: &mut Engine,
-        state: &mut EngineState,
-        input: &Input,
-    ) -> Vec<Message> {
+    fn update(&mut self, engine: &mut Engine, input: &Input) -> Vec<Message> {
         let mut out = Vec::new();
 
         if let Some(first) = &mut self.first {
-            out.append(&mut first.update(engine, state, input));
+            out.append(&mut first.update(engine, input));
         }
 
         if let Some(second) = &mut self.second {
-            out.append(&mut second.update(engine, state, input));
+            out.append(&mut second.update(engine, input));
         }
 
         let rect = self.rect.borrow();
@@ -159,8 +153,8 @@ impl Element for Separator {
             && pos.inside(self.sep_rect)
         {
             match self.direction {
-                Direction::Horizontal => state.set_cursor(Cursor::EwResize),
-                Direction::Vertical => state.set_cursor(Cursor::NsResize),
+                Direction::Horizontal => engine.set_cursor(Cursor::EwResize),
+                Direction::Vertical => engine.set_cursor(Cursor::NsResize),
             }
 
             if input.button_just_pressed(Button::Mouse(MouseButton::Left)) {

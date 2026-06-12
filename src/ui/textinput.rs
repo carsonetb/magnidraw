@@ -68,7 +68,6 @@ impl Element for TextInput {
     fn render<'frame, 'app: 'frame>(
         &'app self,
         _engine: &mut crate::Engine,
-        _state: &mut crate::EngineState,
         drawer: &mut crate::Drawer<'frame>,
         z_index: i32,
         rect: Rect,
@@ -162,12 +161,7 @@ impl Element for TextInput {
         }
     }
 
-    fn update(
-        &mut self,
-        engine: &mut crate::Engine,
-        state: &mut crate::EngineState,
-        input: &crate::Input,
-    ) -> Vec<Message> {
+    fn update(&mut self, engine: &mut crate::Engine, input: &crate::Input) -> Vec<Message> {
         let rect = **&self.rect.borrow();
 
         let clip = Rect::new(
@@ -184,9 +178,9 @@ impl Element for TextInput {
             let mut inside = false;
             if pos.inside(clip) {
                 inside = true;
-                state.set_cursor(Cursor::Text);
+                engine.set_cursor(Cursor::Text);
             } else {
-                state.set_cursor(Cursor::Default);
+                engine.set_cursor(Cursor::Default);
             }
 
             let hit = self.text.inner_buffer().hit(

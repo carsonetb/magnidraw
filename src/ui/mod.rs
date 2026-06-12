@@ -4,7 +4,7 @@ use std::{
     sync::atomic::{AtomicU32, Ordering},
 };
 
-use crate::{Drawer, Engine, EngineState, Input, Rect, Size};
+use crate::{Drawer, Engine, Input, Rect, Size};
 
 mod button;
 mod checkbox;
@@ -52,8 +52,8 @@ pub fn get_id() -> u32 {
 pub trait Element: DynClone {
     /// Similar to the function [`crate::Game::setup`], this function is called
     /// when the Element is first registered.
-    fn setup(&mut self, engine: &mut Engine, state: &mut EngineState) {
-        let _ = (engine, state);
+    fn setup(&mut self, state: &mut Engine) {
+        let _ = state;
     }
 
     /// Similar to the function [`crate::Game::render`], this function is
@@ -64,13 +64,12 @@ pub trait Element: DynClone {
     /// Here the Element must call the render function on its children.
     fn render<'frame, 'app: 'frame>(
         &'app self,
-        engine: &mut Engine,
-        state: &mut EngineState,
+        state: &mut Engine,
         drawer: &mut Drawer<'frame>,
         z_index: i32,
         rect: Rect,
     ) {
-        let _ = (engine, state, drawer, z_index, rect);
+        let _ = (state, drawer, z_index, rect);
     }
 
     /// Similar to the function [`crate::Game::update`], the Element can capture
@@ -78,13 +77,8 @@ pub trait Element: DynClone {
     ///
     /// You also may return some [`Message`]s which will be accumulated so
     /// the [`crate::Game`] can process them.
-    fn update(
-        &mut self,
-        engine: &mut Engine,
-        state: &mut EngineState,
-        input: &Input,
-    ) -> Vec<Message> {
-        let _ = (engine, state, input);
+    fn update(&mut self, state: &mut Engine, input: &Input) -> Vec<Message> {
+        let _ = (state, input);
         Vec::new()
     }
 
@@ -95,9 +89,13 @@ pub trait Element: DynClone {
 
     /// All the children of this Element. An Element may have any number of
     /// children.
-    fn children(&self) -> Vec<&Box<dyn Element>>;
+    fn children(&self) -> Vec<&Box<dyn Element>> {
+        Vec::new()
+    }
 
-    fn children_mut(&mut self) -> Vec<&mut Box<dyn Element>>;
+    fn children_mut(&mut self) -> Vec<&mut Box<dyn Element>> {
+        Vec::new()
+    }
 
     /// Minimum size of this Element. The minimum size of children should be
     /// taken into account if they are present.
@@ -242,8 +240,7 @@ impl Container {
 
     pub(crate) fn render<'frame, 'app: 'frame>(
         &'app self,
-        engine: &mut Engine,
-        state: &mut EngineState,
+        state: &mut Engine,
         drawer: &mut Drawer<'frame>,
     ) {
         let min = self.element.min_size();
@@ -254,16 +251,10 @@ impl Container {
             );
         }
 
-        self.element
-            .render(engine, state, drawer, self.z_index, self.rect);
+        self.element.render(state, drawer, self.z_index, self.rect);
     }
 
-    pub(crate) fn update(
-        &mut self,
-        engine: &mut Engine,
-        state: &mut EngineState,
-        input: &Input,
-    ) -> Vec<Message> {
-        self.element.update(engine, state, input)
+    pub(crate) fn update(&mut self, state: &mut Engine, input: &Input) -> Vec<Message> {
+        self.element.update(state, input)
     }
 }

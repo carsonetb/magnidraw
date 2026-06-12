@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use magnidraw::{
-    Color, Engine, EngineState, Game, Input, Pos, Rect, TextAlign,
+    Color, Engine, Game, Input, Pos, Rect, TextAlign,
     ui::{
         CheckBox, Container, Direction, Element, Label, Message, MessageContent, Radio, Separator,
         Stack, StackItemMode, StackMode, TextInput, Theme, Toggle, UIButton, UIRect, element_child,
@@ -28,10 +28,10 @@ impl UIDemo {
 }
 
 impl Game for UIDemo {
-    fn setup(&mut self, engine: &mut Engine, state: &mut EngineState) {
+    fn setup(&mut self, engine: &mut Engine) {
         // Create the theme for our UI.
-        let theme = Theme::catppuccin_latte(engine, state);
-        engine.apply_theme(state, &theme);
+        let theme = Theme::catppuccin_latte(engine);
+        engine.set_clear_color(theme.clear_color);
 
         // Create the button with all its parameters.
         let text = engine.load_text(
@@ -128,20 +128,20 @@ impl Game for UIDemo {
         // Create the container which is a rectangle that contains the button
         // element.
         self.container = Some(Container::new(
-            Rect::new_basic(Pos::new(0.0, 0.0), state.window_size()),
+            Rect::new_basic(Pos::new(0.0, 0.0), engine.window_size()),
             0,
             "UI".to_string(),
             sum,
         ));
     }
 
-    fn update(&mut self, _engine: &mut Engine, state: &mut EngineState, _input: &Input) {
+    fn update(&mut self, engine: &mut Engine, _input: &Input) {
         self.container.as_mut().unwrap().rect =
-            Rect::new_basic(Pos::new(0.0, 0.0), state.window_size());
-        state.set_window_min_size(self.container.as_ref().unwrap().element.min_size());
+            Rect::new_basic(Pos::new(0.0, 0.0), engine.window_size());
+        engine.set_window_min_size(self.container.as_ref().unwrap().element.min_size());
     }
 
-    fn messages(&mut self, _engine: &mut Engine, _state: &mut EngineState, messages: Vec<Message>) {
+    fn messages(&mut self, _engine: &mut Engine, messages: Vec<Message>) {
         // Process all the messages to check if the button was pressed.
         let container = self.container.as_mut().unwrap();
         for message in messages {

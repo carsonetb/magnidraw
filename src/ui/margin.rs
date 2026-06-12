@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 
 use crate::{
-    Cursor, Engine, EngineState, Rect, Size,
+    Cursor, Engine, Rect, Size,
     ui::{Element, get_id},
 };
 
@@ -37,14 +37,13 @@ impl Margin {
 }
 
 impl Element for Margin {
-    fn setup(&mut self, engine: &mut Engine, state: &mut EngineState) {
-        self.contains.setup(engine, state);
+    fn setup(&mut self, engine: &mut Engine) {
+        self.contains.setup(engine);
     }
 
     fn render<'frame, 'app: 'frame>(
         &'app self,
         engine: &mut Engine,
-        state: &mut EngineState,
         drawer: &mut crate::Drawer<'frame>,
         z_index: i32,
         rect: crate::Rect,
@@ -58,23 +57,18 @@ impl Element for Margin {
             rect.size.h - self.top - self.bottom,
         );
         self.inside.replace(inside);
-        self.contains.render(engine, state, drawer, z_index, inside);
+        self.contains.render(engine, drawer, z_index, inside);
     }
 
-    fn update(
-        &mut self,
-        engine: &mut Engine,
-        state: &mut EngineState,
-        input: &crate::Input,
-    ) -> Vec<super::Message> {
+    fn update(&mut self, engine: &mut Engine, input: &crate::Input) -> Vec<super::Message> {
         if let Some(pos) = input.mouse_pos()
             && pos.inside(*self.rect.borrow())
             && !pos.inside(*self.inside.borrow())
         {
-            state.set_cursor(Cursor::Default);
+            engine.set_cursor(Cursor::Default);
         }
 
-        self.contains.update(engine, state, input)
+        self.contains.update(engine, input)
     }
 
     fn children(&self) -> Vec<&Box<dyn Element>> {

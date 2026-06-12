@@ -1,6 +1,6 @@
 use magnidraw::{
-    AnyAxis, AxisDirection, Button, Color, ControllerAxis, Drawer, EngineState, Game, Input, Pos,
-    Rect, keycode,
+    AnyAxis, AxisDirection, Button, Color, ControllerAxis, Drawer, Engine, Game, Input, Pos, Rect,
+    keycode,
 };
 
 pub struct InputDemo {
@@ -16,12 +16,7 @@ impl InputDemo {
 }
 
 impl Game for InputDemo {
-    fn render<'d, 's: 'd>(
-        &'s self,
-        _engine: &mut magnidraw::Engine,
-        _state: &mut EngineState,
-        drawer: &mut Drawer<'d>,
-    ) {
+    fn render<'d, 's: 'd>(&'s self, _engine: &mut Engine, drawer: &mut Drawer<'d>) {
         // Drawing is simple, for explanations see the rect example.
         drawer.rect(
             0,
@@ -30,7 +25,7 @@ impl Game for InputDemo {
         );
     }
 
-    fn update(&mut self, _engine: &mut magnidraw::Engine, _state: &mut EngineState, input: &Input) {
+    fn update(&mut self, _engine: &mut Engine, input: &Input) {
         // We get the time since the last frame so that no matter the framerate,
         // the character always moves at the same speed. This is a common
         // pattern in game development.

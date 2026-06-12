@@ -17,9 +17,11 @@ dyn-clone = "1.0.20"
 resvg = "0.47.0"
 usvg = "0.47.0"
 tiny-skia = "0.12.0"
+rapier2d = { version = "0.33", optional = true }
 
 [dev-dependencies]
 rand = "0.10.1"
 
 [features]
 ui = []
+physics = ["dep:rapier2d"]

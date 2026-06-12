@@ -1,7 +1,7 @@
 use std::{any::Any, collections::HashMap};
 
 use crate::{
-    Color, Engine, EngineState, Scale,
+    Color, Engine, Scale,
     ui::{
         CheckBoxParams, LabelParams, RadioParams, SeparatorParams, TextInputParams, ToggleParams,
         UIButtonParams,
@@ -24,7 +24,7 @@ pub struct Theme {
 }
 
 impl Theme {
-    pub fn catppuccin_latte(engine: &mut Engine, state: &mut EngineState) -> Self {
+    pub fn catppuccin_latte(engine: &mut Engine) -> Self {
         let crust = Color::rgb255(220.0, 224.0, 232.0);
         let _mantle = Color::rgb255(230.0, 233.0, 239.0);
         let base = Color::rgb255(239.0, 241.0, 245.0);
@@ -83,12 +83,10 @@ impl Theme {
                 toggle_on_color: green,
                 toggle_off_color: surface2,
                 toggle_on: engine.load_svg(
-                    state,
                     include_bytes!("icons/toggle-right.svg"),
                     Scale::new(1.3, 1.3),
                 ),
                 toggle_off: engine.load_svg(
-                    state,
                     include_bytes!("icons/toggle-left.svg"),
                     Scale::new(1.3, 1.3),
                 ),
@@ -100,12 +98,10 @@ impl Theme {
                 on_color: green,
                 off_color: surface2,
                 on_sprite: engine.load_svg(
-                    state,
                     include_bytes!("icons/radio-button-fill.svg"),
                     Scale::new(1.3, 1.3),
                 ),
                 off_sprite: engine.load_svg(
-                    state,
                     include_bytes!("icons/radio-button-light.svg"),
                     Scale::new(1.3, 1.3),
                 ),
@@ -117,12 +113,10 @@ impl Theme {
                 on_color: green,
                 off_color: surface2,
                 on_sprite: engine.load_svg(
-                    state,
                     include_bytes!("icons/check-square-fill.svg"),
                     Scale::new(1.32, 1.32),
                 ),
                 off_sprite: engine.load_svg(
-                    state,
                     include_bytes!("icons/square-light.svg"),
                     Scale::new(1.32, 1.32),
                 ),

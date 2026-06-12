@@ -25,11 +25,12 @@ use crate::{
     input::{Controller, ControllerButton},
 };
 
-pub struct EngineState<'a> {
+pub struct Engine<'a> {
+    engine: &'a mut EngineInternal,
     state: &'a mut State,
 }
 
-impl<'a> EngineState<'a> {
+impl<'a> Engine<'a> {
     pub fn set_window_title(&mut self, title: &str) {
         self.state.window.set_title(title);
     }
@@ -77,18 +78,71 @@ impl<'a> EngineState<'a> {
             .window
             .set_min_inner_size(Some(LogicalSize::new(size.w, size.h)));
     }
+
+    pub fn get_font_system(&self) -> Rc<RefCell<glyphon::FontSystem>> {
+        self.engine.get_font_system()
+    }
+
+    /// Set the basic color the window clears to every frame.
+    /// No, turning down the alpha will not make the window transparent 😭
+    pub fn set_clear_color(&mut self, color: Color) {
+        self.engine.set_clear_color(self.state, color);
+    }
+
+    /// Load an image. You can get the bytes by using the include_bytes! macro.
+    pub fn load_sprite(&mut self, bytes: &'static [u8]) -> Sprite {
+        self.engine.load_sprite(self.state, bytes)
+    }
+
+    pub fn load_svg(&mut self, bytes: &'static [u8], scale: Scale) -> Sprite {
+        self.engine.load_svg(self.state, bytes, scale)
+    }
+
+    /// Load a font, this can be used later via the string. You can get the
+    /// bytes by using the include_bytes! macro.
+    pub fn load_font(&self, bytes: &'static [u8]) {
+        self.engine.load_font(bytes);
+    }
+
+    /// Create a Text object, do not do this every frame.
+    ///
+    /// TODO: Use a TextParams struct instead.
+    pub fn load_text(
+        &self,
+        text: &str,
+        font_size: f32,
+        family: Option<&'static str>,
+        align: TextAlign,
+        region: Option<Rect>,
+    ) -> Text {
+        self.engine
+            .load_text(text, font_size, family, align, region)
+    }
+
+    /// After changing properties of the Text, use this to apply those changes.
+    pub fn reload_text(&self, text: &mut Text) {
+        self.engine.reload_text(text);
+    }
+
+    pub fn clipboard_copy(&mut self, text: String) {
+        self.engine.copy(text);
+    }
+
+    pub fn clipboard_read(&self) -> String {
+        self.engine.paste()
+    }
 }
 
 pub(crate) struct EngineHolder {
     game: Box<dyn Game>,
-    engine: Engine,
+    engine: EngineInternal,
 }
 
 impl EngineHolder {
     pub(crate) fn new(game: Box<dyn Game>) -> Self {
         Self {
             game,
-            engine: Engine::new(),
+            engine: EngineInternal::new(),
         }
     }
 }
@@ -99,8 +153,10 @@ impl Program for EngineHolder {
             .window
             .set_max_inner_size(Some(LogicalSize::new(8000.0, 8000.0)));
         self.engine.init(state);
-        self.game
-            .setup(&mut self.engine, &mut EngineState { state });
+        self.game.setup(&mut Engine {
+            engine: &mut self.engine,
+            state,
+        });
     }
 
     fn event(&mut self, event: &winit::event::WindowEvent, state: &mut State) {
@@ -129,21 +185,33 @@ impl Program for EngineHolder {
             self.engine.deadzone,
         );
 
-        self.game
-            .update(&mut self.engine, &mut EngineState { state }, &input);
+        self.game.update(
+            &mut Engine {
+                engine: &mut self.engine,
+                state,
+            },
+            &input,
+        );
 
         #[cfg(feature = "ui")]
         {
             let mut messages = Vec::new();
             for container in self.game.containers_mut() {
                 messages.append(&mut container.update(
-                    &mut self.engine,
-                    &mut EngineState { state },
+                    &mut Engine {
+                        engine: &mut self.engine,
+                        state,
+                    },
                     &input,
                 ));
             }
-            self.game
-                .messages(&mut self.engine, &mut EngineState { state }, messages);
+            self.game.messages(
+                &mut Engine {
+                    engine: &mut self.engine,
+                    state,
+                },
+                messages,
+            );
         }
 
         self.engine.input = took_input;
@@ -162,12 +230,23 @@ impl Program for EngineHolder {
             self.engine.sprite_pipeline_index,
         );
 
-        self.game
-            .render(&mut self.engine, &mut EngineState { state }, &mut drawer);
+        self.game.render(
+            &mut Engine {
+                engine: &mut self.engine,
+                state,
+            },
+            &mut drawer,
+        );
 
         #[cfg(feature = "ui")]
         for container in self.game.containers() {
-            container.render(&mut self.engine, &mut EngineState { state }, &mut drawer);
+            container.render(
+                &mut Engine {
+                    engine: &mut self.engine,
+                    state,
+                },
+                &mut drawer,
+            );
         }
 
         drawer.collect(
@@ -180,7 +259,7 @@ impl Program for EngineHolder {
     }
 }
 
-pub struct Engine {
+struct EngineInternal {
     // Pipelines and materials
     rect_pipeline_index: u32,
     rectext_pipeline_index: u32,
@@ -210,15 +289,13 @@ pub struct Engine {
     window_height: f32,
 }
 
-impl Engine {
+impl EngineInternal {
     pub fn get_font_system(&self) -> Rc<RefCell<glyphon::FontSystem>> {
         self.font_system.as_ref().unwrap().clone()
     }
 
-    /// Set the basic color the window clears to every frame.
-    /// No, turning down the alpha will not make the window transparent 😭
-    pub fn set_clear_color(&mut self, state: &mut EngineState, color: Color) {
-        state.state.clear_color = wgpu::Color {
+    fn set_clear_color(&mut self, state: &mut State, color: Color) {
+        state.clear_color = wgpu::Color {
             r: color.r as f64,
             g: color.g as f64,
             b: color.b as f64,
@@ -226,34 +303,26 @@ impl Engine {
         };
     }
 
-    /// Load an image. You can get the bytes by using the include_bytes! macro.
-    pub fn load_sprite(&mut self, state: &mut EngineState, bytes: &'static [u8]) -> Sprite {
+    fn load_sprite(&mut self, state: &mut State, bytes: &'static [u8]) -> Sprite {
         Sprite::new(
             "Unnamed Sprite",
-            &mut state.state,
+            state,
             &self.sprite_bind_group_layout.as_ref().unwrap(),
             bytes,
         )
     }
 
-    pub fn load_svg(
-        &mut self,
-        state: &mut EngineState,
-        bytes: &'static [u8],
-        scale: Scale,
-    ) -> Sprite {
+    fn load_svg(&mut self, state: &mut State, bytes: &'static [u8], scale: Scale) -> Sprite {
         Sprite::new_svg(
             "Unnamed Sprite",
-            &mut state.state,
+            state,
             &self.sprite_bind_group_layout.as_ref().unwrap(),
             bytes,
             scale,
         )
     }
 
-    /// Load a font, this can be used later via the string. You can get the
-    /// bytes by using the include_bytes! macro.
-    pub fn load_font(&self, bytes: &'static [u8]) {
+    fn load_font(&self, bytes: &'static [u8]) {
         self.font_system
             .as_ref()
             .unwrap()
@@ -263,8 +332,7 @@ impl Engine {
             .load_font_data(bytes.to_vec());
     }
 
-    /// Create a Text object, do not do this every frame.
-    pub fn load_text(
+    fn load_text(
         &self,
         text: &str,
         font_size: f32,
@@ -290,22 +358,16 @@ impl Engine {
         )
     }
 
-    /// After changing properties of the Text, use this to apply those changes.
-    pub fn reload_text(&self, text: &mut Text) {
+    fn reload_text(&self, text: &mut Text) {
         text.reload(self.font_system.as_ref().unwrap().borrow_mut().deref_mut());
     }
 
-    pub fn copy(&mut self, text: String) {
+    fn copy(&mut self, text: String) {
         self.clipboard.as_mut().unwrap().write(text).unwrap();
     }
 
-    pub fn paste(&mut self) -> String {
+    fn paste(&self) -> String {
         self.clipboard.as_ref().unwrap().read().unwrap()
-    }
-
-    #[cfg(feature = "ui")]
-    pub fn apply_theme(&mut self, state: &mut EngineState, theme: &crate::ui::Theme) {
-        self.set_clear_color(state, theme.clear_color);
     }
 
     fn new() -> Self {

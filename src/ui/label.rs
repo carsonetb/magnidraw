@@ -4,8 +4,7 @@ use glyphon::{Edit, cosmic_text::Selection};
 use winit::event::MouseButton;
 
 use crate::{
-    Button, Color, Cursor, Drawer, Engine, EngineState, Input, KeyboardButton, Rect, Size, Text,
-    TextAlign,
+    Button, Color, Cursor, Drawer, Engine, Input, KeyboardButton, Rect, Size, Text, TextAlign,
     ui::{Element, Message, get_id},
 };
 
@@ -47,7 +46,6 @@ impl Element for Label {
     fn render<'frame, 'app: 'frame>(
         &'app self,
         _engine: &mut Engine,
-        _state: &mut EngineState,
         drawer: &mut Drawer<'frame>,
         z_index: i32,
         rect: Rect,
@@ -121,12 +119,7 @@ impl Element for Label {
         }
     }
 
-    fn update(
-        &mut self,
-        engine: &mut Engine,
-        state: &mut EngineState,
-        input: &Input,
-    ) -> Vec<Message> {
+    fn update(&mut self, engine: &mut Engine, input: &Input) -> Vec<Message> {
         let rect = *self.rect.borrow().deref();
         self.text.line_length = Some(rect.size.w);
         self.text.align(self.align);
@@ -145,7 +138,7 @@ impl Element for Label {
                     line.line_height,
                 )) {
                     set = true;
-                    state.set_cursor(Cursor::Text);
+                    engine.set_cursor(Cursor::Text);
                 }
             }
 
@@ -174,7 +167,7 @@ impl Element for Label {
                     }
                 }
             } else {
-                state.set_cursor(Cursor::Default);
+                engine.set_cursor(Cursor::Default);
             }
         }
 
@@ -183,17 +176,9 @@ impl Element for Label {
                 || input.button_pressed(Button::Keyboard(KeyboardButton::ControlRight)))
             && input.button_just_pressed(Button::Keyboard(KeyboardButton::KeyC))
         {
-            engine.copy(text);
+            engine.clipboard_copy(text);
         }
 
-        Vec::new()
-    }
-
-    fn children(&self) -> Vec<&Box<dyn Element>> {
-        Vec::new()
-    }
-
-    fn children_mut(&mut self) -> Vec<&mut Box<dyn Element>> {
         Vec::new()
     }
 

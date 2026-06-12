@@ -50,7 +50,6 @@ impl Element for Radio {
     fn render<'frame, 'app: 'frame>(
         &'app self,
         _engine: &mut crate::Engine,
-        _state: &mut crate::EngineState,
         drawer: &mut crate::Drawer<'frame>,
         z_index: i32,
         rect: Rect,
@@ -96,12 +95,7 @@ impl Element for Radio {
         self.rect.replace(rect);
     }
 
-    fn update(
-        &mut self,
-        _engine: &mut crate::Engine,
-        state: &mut crate::EngineState,
-        input: &crate::Input,
-    ) -> Vec<Message> {
+    fn update(&mut self, engine: &mut crate::Engine, input: &crate::Input) -> Vec<Message> {
         let rect = *self.rect.borrow();
 
         if let Some(pos) = input.mouse_pos()
@@ -139,9 +133,9 @@ impl Element for Radio {
             }
 
             if inside {
-                state.set_cursor(Cursor::Pointer);
+                engine.set_cursor(Cursor::Pointer);
             } else {
-                state.set_cursor(Cursor::Default);
+                engine.set_cursor(Cursor::Default);
             }
         }
 

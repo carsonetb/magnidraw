@@ -53,7 +53,6 @@ impl Element for Toggle {
     fn render<'frame, 'app: 'frame>(
         &'app self,
         _engine: &mut crate::Engine,
-        _state: &mut crate::EngineState,
         drawer: &mut crate::Drawer<'frame>,
         z_index: i32,
         rect: Rect,
@@ -90,12 +89,7 @@ impl Element for Toggle {
         self.rect.replace(rect);
     }
 
-    fn update(
-        &mut self,
-        _engine: &mut crate::Engine,
-        state: &mut crate::EngineState,
-        input: &crate::Input,
-    ) -> Vec<Message> {
+    fn update(&mut self, engine: &mut crate::Engine, input: &crate::Input) -> Vec<Message> {
         let rect = *self.rect.borrow();
 
         if let Some(pos) = input.mouse_pos()
@@ -127,7 +121,7 @@ impl Element for Toggle {
             };
 
             if pos.inside(toggle_rect) {
-                state.set_cursor(Cursor::Pointer);
+                engine.set_cursor(Cursor::Pointer);
 
                 if input.button_just_pressed(Button::Mouse(MouseButton::Left)) {
                     self.state = !self.state;
@@ -139,7 +133,7 @@ impl Element for Toggle {
                     }];
                 }
             } else {
-                state.set_cursor(Cursor::Default);
+                engine.set_cursor(Cursor::Default);
             }
         }
 

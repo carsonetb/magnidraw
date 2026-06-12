@@ -1,4 +1,4 @@
-use magnidraw::{Color, Drawer, Engine, EngineState, Game, Pos, Text, TextAlign};
+use magnidraw::{Color, Drawer, Engine, Game, Pos, Text, TextAlign};
 use rand::seq::IndexedRandom;
 
 pub struct TextDemo {
@@ -6,7 +6,7 @@ pub struct TextDemo {
 }
 
 impl Game for TextDemo {
-    fn setup(&mut self, engine: &mut Engine, _state: &mut EngineState) {
+    fn setup(&mut self, engine: &mut Engine) {
         // We load the font here. The font's family name is the same as the one
         // used in CSS.
         engine.load_font(include_bytes!("CourierPrime-Regular.ttf"));
@@ -26,12 +26,7 @@ impl Game for TextDemo {
         ));
     }
 
-    fn render<'d, 's: 'd>(
-        &'s self,
-        _engine: &mut Engine,
-        _state: &mut EngineState,
-        drawer: &mut Drawer<'d>,
-    ) {
+    fn render<'d, 's: 'd>(&'s self, _engine: &mut Engine, drawer: &mut Drawer<'d>) {
         // Drawing the text is relatively simple, we provide it to the drawer.
         // The lifetimes let us give the drawer a reference to the text,
         // because the borrow checker knows that the text (owned by self) will
@@ -44,7 +39,7 @@ impl Game for TextDemo {
         );
     }
 
-    fn update(&mut self, engine: &mut Engine, _state: &mut EngineState, _input: &magnidraw::Input) {
+    fn update(&mut self, engine: &mut Engine, _input: &magnidraw::Input) {
         // Here we show an example of changing the text. We always append a
         // random number from 1..9 to the end of the string.
         self.text.as_mut().unwrap().text = format!(

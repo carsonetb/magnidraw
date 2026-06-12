@@ -1,7 +1,7 @@
 use std::{cell::RefCell, ops::Deref};
 
 use crate::{
-    Button, Color, Cursor, Drawer, Engine, EngineState, Input, MouseButton, Rect, Size, Text,
+    Button, Color, Cursor, Drawer, Engine, Input, MouseButton, Rect, Size, Text,
     ui::{Element, Message, MessageContent, Theme, get_id},
 };
 
@@ -61,7 +61,6 @@ impl Element for UIButton {
     fn render<'frame, 'app: 'frame>(
         &'app self,
         _engine: &mut Engine,
-        _state: &mut EngineState,
         drawer: &mut Drawer<'frame>,
         z_index: i32,
         rect: Rect,
@@ -106,12 +105,7 @@ impl Element for UIButton {
         }
     }
 
-    fn update(
-        &mut self,
-        _engine: &mut Engine,
-        state: &mut EngineState,
-        input: &Input,
-    ) -> Vec<Message> {
+    fn update(&mut self, engine: &mut Engine, input: &Input) -> Vec<Message> {
         let mouse_pos = match input.mouse_pos() {
             Some(pos) => pos,
             None => return Vec::new(),
@@ -122,7 +116,7 @@ impl Element for UIButton {
 
         let mut out = Vec::new();
         if mouse_pos.inside(self.rect.borrow().deref().clone()) {
-            state.set_cursor(Cursor::Pointer);
+            engine.set_cursor(Cursor::Pointer);
 
             if input.button_pressed(Button::Mouse(MouseButton::Left)) {
                 self.is_pressed = true;
@@ -140,14 +134,6 @@ impl Element for UIButton {
 
     fn apply_theme(&mut self, theme: Theme) {
         self.params = theme.buttons;
-    }
-
-    fn children(&self) -> Vec<&Box<dyn Element>> {
-        Vec::new()
-    }
-
-    fn children_mut(&mut self) -> Vec<&mut Box<dyn Element>> {
-        Vec::new()
     }
 
     fn min_size(&self) -> crate::Size {

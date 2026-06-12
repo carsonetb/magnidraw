@@ -68,16 +68,15 @@ impl Stack {
 }
 
 impl Element for Stack {
-    fn setup(&mut self, engine: &mut crate::Engine, state: &mut crate::EngineState) {
+    fn setup(&mut self, engine: &mut crate::Engine) {
         for (element, _) in &mut self.elements {
-            element.setup(engine, state);
+            element.setup(engine);
         }
     }
 
     fn render<'frame, 'app: 'frame>(
         &'app self,
         engine: &mut crate::Engine,
-        state: &mut crate::EngineState,
         drawer: &mut crate::Drawer<'frame>,
         z_index: i32,
         rect: crate::Rect,
@@ -131,7 +130,6 @@ impl Element for Stack {
 
             element.render(
                 engine,
-                state,
                 drawer,
                 z_index,
                 match self.direction {
@@ -148,15 +146,10 @@ impl Element for Stack {
         }
     }
 
-    fn update(
-        &mut self,
-        engine: &mut crate::Engine,
-        state: &mut crate::EngineState,
-        input: &crate::Input,
-    ) -> Vec<super::Message> {
+    fn update(&mut self, engine: &mut crate::Engine, input: &crate::Input) -> Vec<super::Message> {
         let mut messages = Vec::new();
         for (element, _) in &mut self.elements {
-            messages.append(&mut element.update(engine, state, input));
+            messages.append(&mut element.update(engine, input));
         }
         messages
     }

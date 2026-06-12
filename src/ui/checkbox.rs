@@ -41,7 +41,6 @@ impl Element for CheckBox {
     fn render<'frame, 'app: 'frame>(
         &'app self,
         _engine: &mut crate::Engine,
-        _state: &mut crate::EngineState,
         drawer: &mut crate::Drawer<'frame>,
         z_index: i32,
         rect: Rect,
@@ -87,12 +86,7 @@ impl Element for CheckBox {
         self.rect.replace(rect);
     }
 
-    fn update(
-        &mut self,
-        _engine: &mut crate::Engine,
-        state: &mut crate::EngineState,
-        input: &crate::Input,
-    ) -> Vec<super::Message> {
+    fn update(&mut self, engine: &mut crate::Engine, input: &crate::Input) -> Vec<super::Message> {
         let rect = *self.rect.borrow();
 
         if let Some(pos) = input.mouse_pos()
@@ -137,20 +131,12 @@ impl Element for CheckBox {
             }
 
             if inside {
-                state.set_cursor(Cursor::Pointer);
+                engine.set_cursor(Cursor::Pointer);
             } else {
-                state.set_cursor(Cursor::Default);
+                engine.set_cursor(Cursor::Default);
             }
         }
 
-        Vec::new()
-    }
-
-    fn children(&self) -> Vec<&Box<dyn Element>> {
-        Vec::new()
-    }
-
-    fn children_mut(&mut self) -> Vec<&mut Box<dyn Element>> {
         Vec::new()
     }
 

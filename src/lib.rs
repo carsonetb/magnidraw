@@ -8,7 +8,7 @@ mod text;
 pub mod ui;
 
 pub use drawers::Drawer;
-pub use engine::{Engine, EngineState};
+pub use engine::Engine;
 pub use gilrs::Axis as AnyAxis;
 pub use glyphon::cosmic_text::Align as TextAlign;
 pub use input::{AxisDirection, Button, ControllerAxis, ControllerButton, Input, keycode};
@@ -26,8 +26,8 @@ pub trait Game {
     /// Runs at the beginning of the game. This is where you should setup your
     /// sprites and text, although they *can* be setup elsewhere (particularly,
     /// in the render function).
-    fn setup(&mut self, engine: &mut Engine, state: &mut EngineState) {
-        let _ = (engine, state);
+    fn setup(&mut self, state: &mut Engine) {
+        let _ = state;
     }
 
     /// The engine sends a [`Drawer`] to the game, to which the game can pass
@@ -39,32 +39,22 @@ pub trait Game {
     /// that `self` will definetely outlive `drawer`. This makes sense, because
     /// internally the Drawer object is destroyed every frame, while `self`
     /// lasts for the entire program.
-    fn render<'frame, 'app: 'frame>(
-        &'app self,
-        engine: &mut Engine,
-        state: &mut EngineState,
-        drawer: &mut Drawer<'frame>,
-    ) {
-        let _ = (engine, state, drawer);
+    fn render<'frame, 'app: 'frame>(&'app self, state: &mut Engine, drawer: &mut Drawer<'frame>) {
+        let _ = (state, drawer);
     }
 
     /// The engine sends an [`Input`] to the game, from which the game can
     /// check for any input. You cannot check for input in the render function,
     /// because the render function happens possibly *while* inputs are being
     /// collected.
-    fn update(&mut self, engine: &mut Engine, state: &mut EngineState, input: &Input) {
-        let _ = (engine, state, input);
+    fn update(&mut self, state: &mut Engine, input: &Input) {
+        let _ = (state, input);
     }
 
     /// Process all the messages submitted by the UI [`ui::Container`]s.
     #[cfg(feature = "ui")]
-    fn messages(
-        &mut self,
-        engine: &mut Engine,
-        state: &mut EngineState,
-        messages: Vec<crate::ui::Message>,
-    ) {
-        let _ = (engine, state, messages);
+    fn messages(&mut self, state: &mut Engine, messages: Vec<crate::ui::Message>) {
+        let _ = (state, messages);
     }
 
     /// Get all the UI Containers this program is currently using.
