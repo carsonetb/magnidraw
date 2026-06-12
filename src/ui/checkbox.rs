@@ -1,41 +1,32 @@
-use std::cell::RefCell;
+use std::{cell::RefCell, collections::HashSet};
 
 use crate::{
     Button, Color, Cursor, MouseButton, Pos, Rect, Scale, Size, Sprite, Text,
     ui::{Element, Message, MessageContent, get_id},
 };
 
-/// Params for [`Radio`].
 #[derive(Debug, Clone, Copy)]
-pub struct RadioParams {
+pub struct CheckBoxParams {
     pub text_color: Color,
-    /// Color of the radio when it is toggled on.
     pub on_color: Color,
-    /// Color of the radio when it is toggled off.
     pub off_color: Color,
     pub on_sprite: Sprite,
     pub off_sprite: Sprite,
-    /// External margin of the element, outside the rectangle. Ordered left,
-    /// right, top, bottom.
     pub margin: [f32; 4],
-    /// Space between the toggle icon and the text.
     pub icon_text_padding: f32,
 }
 
-/// A row of radio buttons where only one can be selected at a time.
 #[derive(Debug, Clone)]
-pub struct Radio {
-    /// All the options in this column.
+pub struct CheckBox {
     pub options: Vec<Text>,
-    /// The index of the option which is selected.
-    pub selected: usize,
-    params: RadioParams,
+    pub selected: HashSet<usize>,
+    params: CheckBoxParams,
     rect: RefCell<Rect>,
     id: u32,
 }
 
-impl Radio {
-    pub fn new(params: RadioParams, options: Vec<Text>, selected: usize) -> Self {
+impl CheckBox {
+    pub fn new(params: CheckBoxParams, options: Vec<Text>, selected: HashSet<usize>) -> Self {
         Self {
             options,
             selected,
@@ -46,7 +37,7 @@ impl Radio {
     }
 }
 
-impl Element for Radio {
+impl Element for CheckBox {
     fn render<'frame, 'app: 'frame>(
         &'app self,
         _engine: &mut crate::Engine,
@@ -62,7 +53,7 @@ impl Element for Radio {
             let indie_height = on_size.h.max(off_size.h).max(text_size.h);
             let height = indie_height * (i as f32);
 
-            let (sprite, color) = if i == self.selected {
+            let (sprite, color) = if self.selected.contains(&i) {
                 (self.params.on_sprite, self.params.on_color)
             } else {
                 (self.params.off_sprite, self.params.off_color)
@@ -101,7 +92,7 @@ impl Element for Radio {
         _engine: &mut crate::Engine,
         state: &mut crate::EngineState,
         input: &crate::Input,
-    ) -> Vec<Message> {
+    ) -> Vec<super::Message> {
         let rect = *self.rect.borrow();
 
         if let Some(pos) = input.mouse_pos()
@@ -115,7 +106,7 @@ impl Element for Radio {
                 let indie_height = on_size.h.max(off_size.h).max(text_size.h);
                 let height = indie_height * (i as f32);
 
-                let sprite = if i == self.selected {
+                let sprite = if self.selected.contains(&i) {
                     self.params.on_sprite
                 } else {
                     self.params.off_sprite
@@ -132,8 +123,15 @@ impl Element for Radio {
                     inside = true;
 
                     if input.button_just_pressed(Button::Mouse(MouseButton::Left)) {
-                        self.selected = i;
-                        return vec![Message::new(self, MessageContent::RadioSelected(i))];
+                        if self.selected.contains(&i) {
+                            self.selected.remove(&i);
+                        } else {
+                            self.selected.insert(i);
+                        }
+                        return vec![Message::new(
+                            self,
+                            MessageContent::CheckBoxModified(self.selected.clone()),
+                        )];
                     }
                 }
             }

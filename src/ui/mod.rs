@@ -7,6 +7,7 @@ use std::{
 use crate::{Drawer, Engine, EngineState, Input, Rect, Size};
 
 mod button;
+mod checkbox;
 mod label;
 mod margin;
 mod radio;
@@ -18,6 +19,7 @@ mod theme;
 mod toggle;
 
 pub use button::*;
+pub use checkbox::*;
 use dyn_clone::{DynClone, clone_trait_object};
 pub use label::*;
 pub use margin::*;
@@ -200,6 +202,8 @@ pub enum MessageContent {
     ToggleOff,
     /// One of the entries of a [`Radio`] button was selected.
     RadioSelected(usize),
+    /// A checkbox was modified in some way.
+    CheckBoxModified(HashSet<usize>),
     /// Enter was pressed on a [`TextInput`].
     TextInputSubmit(String),
     Other(Box<dyn Any>),

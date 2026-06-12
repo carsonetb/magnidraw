@@ -3,7 +3,8 @@ use std::{any::Any, collections::HashMap};
 use crate::{
     Color, Engine, EngineState, Scale,
     ui::{
-        LabelParams, RadioParams, SeparatorParams, TextInputParams, ToggleParams, UIButtonParams,
+        CheckBoxParams, LabelParams, RadioParams, SeparatorParams, TextInputParams, ToggleParams,
+        UIButtonParams,
     },
 };
 
@@ -17,94 +18,12 @@ pub struct Theme {
     pub text_inputs: TextInputParams,
     pub toggles: ToggleParams,
     pub radios: RadioParams,
+    pub checkboxes: CheckBoxParams,
     /// Other attributes for custom UI elements.
     pub other: HashMap<String, Box<dyn Any>>,
 }
 
 impl Theme {
-    pub fn nord(engine: &mut Engine, state: &mut EngineState) -> Self {
-        let nord_0 = Color::rgb255(46.0, 52.0, 64.0);
-        let nord_1 = Color::rgb255(59.0, 66.0, 82.0);
-        let nord_2 = Color::rgb255(67.0, 76.0, 94.0);
-        let nord_3 = Color::rgb255(76.0, 86.0, 106.0);
-
-        let nord_4 = Color::rgb255(216.0, 222.0, 233.0);
-        let _nord_5 = Color::rgb255(229.0, 233.0, 240.0);
-        let nord_6 = Color::rgb255(236.0, 239.0, 244.0);
-
-        Self {
-            font: "Sans Serif",
-            clear_color: nord_0,
-            buttons: UIButtonParams {
-                text_color: nord_6,
-                color: nord_1,
-                hover_color: nord_2,
-                press_color: nord_1,
-                padding: [10.0, 10.0, 10.0, 10.0],
-                margin: [7.0, 7.0, 7.0, 7.0],
-                radii: [10.0, 10.0, 10.0, 10.0],
-                border_width: 0.0,
-                border_color: Color::BLACK,
-            },
-            separators: SeparatorParams {
-                width: 2.0,
-                color: nord_3,
-            },
-            labels: LabelParams {
-                color: nord_6,
-                selection_color: Color::rgba(nord_4.r, nord_4.g, nord_4.b, 0.2),
-            },
-            text_inputs: TextInputParams {
-                color: nord_1,
-                text_color: nord_6,
-                hint_color: nord_4,
-                selection_color: Color::rgba(nord_4.r, nord_4.g, nord_4.b, 0.2),
-                cursor_color: nord_6,
-                cursor_width: 2.0,
-                margin: [7.0, 7.0, 7.0, 7.0],
-                padding: [5.0, 5.0, 5.0, 5.0],
-                radii: [10.0, 10.0, 10.0, 10.0],
-                border_width: 0.0,
-                border_color: Color::BLACK,
-            },
-            toggles: ToggleParams {
-                text_color: nord_6,
-                toggle_on_color: nord_6,
-                toggle_off_color: nord_6,
-                toggle_on: engine.load_svg(
-                    state,
-                    include_bytes!("icons/toggle-right.svg"),
-                    Scale::new(2.0, 2.0),
-                ),
-                toggle_off: engine.load_svg(
-                    state,
-                    include_bytes!("icons/toggle-left.svg"),
-                    Scale::new(2.0, 2.0),
-                ),
-                margin: [7.0, 7.0, 7.0, 7.0],
-                icon_text_padding: 7.0,
-            },
-            radios: RadioParams {
-                text_color: nord_6,
-                on_color: nord_6,
-                off_color: nord_6,
-                on_sprite: engine.load_svg(
-                    state,
-                    include_bytes!("icons/radio-button-fill.svg"),
-                    Scale::new(2.0, 2.0),
-                ),
-                off_sprite: engine.load_svg(
-                    state,
-                    include_bytes!("icons/radio-button-light.svg"),
-                    Scale::new(2.0, 2.0),
-                ),
-                margin: [7.0, 7.0, 7.0, 7.0],
-                icon_text_padding: 7.0,
-            },
-            other: HashMap::new(),
-        }
-    }
-
     pub fn catppuccin_latte(engine: &mut Engine, state: &mut EngineState) -> Self {
         let crust = Color::rgb255(220.0, 224.0, 232.0);
         let _mantle = Color::rgb255(230.0, 233.0, 239.0);
@@ -189,6 +108,23 @@ impl Theme {
                     state,
                     include_bytes!("icons/radio-button-light.svg"),
                     Scale::new(1.3, 1.3),
+                ),
+                margin: [7.0, 7.0, 7.0, 7.0],
+                icon_text_padding: 7.0,
+            },
+            checkboxes: CheckBoxParams {
+                text_color: text,
+                on_color: green,
+                off_color: surface2,
+                on_sprite: engine.load_svg(
+                    state,
+                    include_bytes!("icons/check-square-fill.svg"),
+                    Scale::new(1.32, 1.32),
+                ),
+                off_sprite: engine.load_svg(
+                    state,
+                    include_bytes!("icons/square-light.svg"),
+                    Scale::new(1.32, 1.32),
                 ),
                 margin: [7.0, 7.0, 7.0, 7.0],
                 icon_text_padding: 7.0,

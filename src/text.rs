@@ -5,7 +5,7 @@ use keydraw::state::State;
 
 use crate::{Color, Pos, Rect, Size, TextAlign};
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Text {
     pub editor: glyphon::Editor<'static>,
     pub text: String,

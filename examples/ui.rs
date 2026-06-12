@@ -1,8 +1,10 @@
+use std::collections::HashSet;
+
 use magnidraw::{
     Color, Engine, EngineState, Game, Input, Pos, Rect, TextAlign,
     ui::{
-        Container, Direction, Element, Label, Message, MessageContent, Radio, Separator, Stack,
-        StackItemMode, StackMode, TextInput, Theme, Toggle, UIButton, UIRect, element_child,
+        CheckBox, Container, Direction, Element, Label, Message, MessageContent, Radio, Separator,
+        Stack, StackItemMode, StackMode, TextInput, Theme, Toggle, UIButton, UIRect, element_child,
     },
 };
 
@@ -71,6 +73,24 @@ impl Game for UIDemo {
                     engine.load_text("Or me ...", 28.0, Some(theme.font), TextAlign::Left, None),
                 ],
                 1,
+            )),
+            StackItemMode::Compress,
+        ));
+        stack.push((
+            Box::new(CheckBox::new(
+                theme.checkboxes,
+                vec![
+                    engine.load_text("Check me?", 28.0, Some(theme.font), TextAlign::Left, None),
+                    engine.load_text("Or me ...", 28.0, Some(theme.font), TextAlign::Left, None),
+                    engine.load_text(
+                        "One me please!",
+                        28.0,
+                        Some(theme.font),
+                        TextAlign::Left,
+                        None,
+                    ),
+                ],
+                HashSet::new(),
             )),
             StackItemMode::Compress,
         ));
